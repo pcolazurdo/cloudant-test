@@ -1,6 +1,7 @@
 # Logs
 logs
 *.log
+npm-debug.log.*
 
 # Runtime data
 pids
@@ -25,3 +26,9 @@ build/Release
 # Dependency directory
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git-
 node_modules
+
+#CloudFoundry setings
+.cf
+
+#Application Sensitive Information
+twitter-cred.json

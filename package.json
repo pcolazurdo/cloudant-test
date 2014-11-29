@@ -7,7 +7,12 @@
     "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1"
   },
   "dependencies": {
-    "nano": "^6.0.2"
+    "nano": "^6.0.2",
+    "express": "3.4.7",
+    "jade": "1.1.4",
+    "log4js": "^0.6.21",
+    "twitter": "^0.2.12",
+    "xml-escape": "^1.0.0"
   },
   "repository": "",
   "keywords": [
