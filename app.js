@@ -13,6 +13,9 @@ var util = require('util');
 var twitter = require('twitter');
 var http = require('http');
 
+
+isCloudant = false;
+
 // Retrieve information from Bluemix Environment if possible
 if (process.env.VCAP_SERVICES) {
 	  // Running on Bluemix. Parse the process.env for the port and host that we've been assigned.
@@ -22,6 +25,7 @@ if (process.env.VCAP_SERVICES) {
 	  console.log('VCAP_SERVICES: %s', process.env.VCAP_SERVICES);
 	  // Also parse out Cloudant settings.
 	  var cloudant = env['cloudantNoSQLDB'][0]['credentials'];
+		isCloudant = true;
 }
 
 var port = (process.env.VCAP_APP_PORT || 1337);
@@ -31,26 +35,32 @@ var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 if (process.env.COUCH_HOST) {
           var cloudant = process.env['COUCH_HOST'];
           console.log (cloudant);
+					isCloudant = true;
 }
 
-var nano = require('nano')(cloudant);
-var db_name = "twitter";
-var db = nano.use(db_name);
+
+if (isCloudant) {
+	var nano = require('nano')(cloudant);
+	var db_name = "twitter";
+	var db = nano.use(db_name);
+}
 
 function insert_doc(doc, tried) {
-  db.insert(doc,
-    function (error,http_body,http_headers) {
-      if(error) {
-        if(error.message === 'no_db_file'  && tried < 1) {
-          // create database and retry
-          return nano.db.create(db_name, function () {
-            insert_doc(doc, tried+1);
-          });
-        }
-        else { return console.log(error); }
-      }
-      console.log(http_body);
-  });
+	if (isCloudant) {
+	  db.insert(doc,
+	    function (error,http_body,http_headers) {
+	      if(error) {
+	        if(error.message === 'no_db_file'  && tried < 1) {
+	          // create database and retry
+	          return nano.db.create(db_name, function () {
+	            insert_doc(doc, tried+1);
+	          });
+	        }
+	        else { return console.log(error); }
+	      }
+	      console.log(http_body);
+	  });
+	}
 }
 
   // insert_doc({nano: true}, 0);
