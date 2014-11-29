@@ -7,7 +7,7 @@
  */
 
 // Obtain the pouchdb interface from VCAP_SERVICES
-var pouchdb = require('pouchdb');
+//var nano = require('nano');
 var http = require('http');
 if (process.env.VCAP_SERVICES) {
 	  // Running on Bluemix. Parse the process.env for the port and host that we've been assigned.
@@ -18,6 +18,33 @@ if (process.env.VCAP_SERVICES) {
 	  // Also parse out Cloudant settings.
 	  var cloudant = env['cloudantNoSQLDB'][0]['credentials'];
 }
+
+if (process.env.COUCH_HOST) {
+          var cloudant = process.env['COUCH_HOST'];
+          console.log (cloudant);
+}
+
+  var nano = require('nano')(cloudant);
+  var db_name = "test";
+  var db = nano.use(db_name);
+
+  function insert_doc(doc, tried) {
+    db.insert(doc,
+      function (error,http_body,http_headers) {
+        if(error) {
+          if(error.message === 'no_db_file'  && tried < 1) {
+            // create database and retry
+            return nano.db.create(db_name, function () {
+              insert_doc(doc, tried+1);
+            });
+          }
+          else { return console.log(error); }
+        }
+        console.log(http_body);
+    });
+  }
+
+  insert_doc({nano: true}, 0);
 
 //Insert records into the books DB
  var insert_records = function(req, res) {

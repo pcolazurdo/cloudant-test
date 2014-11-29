@@ -1,15 +1,14 @@
 {
-  "name": "bm-cloudant",
+  "name": "ibm-cloudant",
   "version": "0.1.0",
-  "description": "bm-cloudant",
+  "description": "ibm-cloudant",
   "main": "hello-world-server.js",
   "scripts": {
     "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1"
   },
   "dependencies": {
-	    "pouchdb":"*"
-	    
-	  },
+    "nano": "^6.0.2"
+  },
   "repository": "",
   "keywords": [
     "Node.js",
