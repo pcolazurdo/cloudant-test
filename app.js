@@ -34,8 +34,8 @@ var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 // Retrieve cloudant information from Linux Environment
 if (process.env.COUCH_HOST) {
           var cloudant = process.env['COUCH_HOST'];
-          console.log (cloudant);
 					isCloudant = true;
+					console.log (cloudant + " - isCloudant: true");
 }
 
 
@@ -73,10 +73,16 @@ var twit = new twitter(configTwitter);
 
 twit.stream('user', {track:'pcolazurdo'}, function(stream) {
     stream.on('data', function(data) {
-        console.log(util.inspect(data));
-				//insert_doc(data, data.target_object.id_str, function (err, response) {
-				//        console.log(err || response);
-				//      });
+        //console.log(typeof data.target_object);
+				//console.log(typeof data.id_str);
+				//console.log(util.inspect(data));
+				// only insert tweets
+				if (typeof data.id_str !== 'undefined') {
+					console.log("Inserting new doc on CouchDB");
+					insert_doc(data, data.id_str, function (err, response) {
+				  	console.log(err || response);
+				  });
+				};
     });
     //stream.on('favorite', function(data) {
     //    console.log(data.target_object.text);
@@ -85,7 +91,7 @@ twit.stream('user', {track:'pcolazurdo'}, function(stream) {
     //      });
     //});
     // Disconnect stream after five seconds
-    setTimeout(stream.destroy, 5000);
+    //setTimeout(stream.destroy, 5000);
 });
 
 //Create a Webserver and wait for REST API CRUD calls
