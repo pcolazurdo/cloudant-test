@@ -12,9 +12,57 @@ var log4js = require('log4js');
 var util = require('util');
 var twitter = require('twitter');
 var http = require('http');
+var https = require('https');
+var xmlescape = require('xml-escape');
 
 
-isCloudant = false;
+//detect environment we're running - default is 'DEV'
+var env = process.env.NODE_ENV || 'DEV';
+
+// Setup logging
+log4js.loadAppender('file');
+log4js.addAppender(log4js.appenders.file('output.log',null,10000000000));
+log4js.replaceConsole() // the important part
+var logger = log4js.getLogger();
+// End Setup logging
+
+//Capture all Unhandled Errors - seems not recommended in production so we use
+// it only if we aren't in PROD
+if (env != 'PROD') {
+	process.on('uncaughtException', function(err) {
+    setTimeout(function() {
+    	console.log("Catched Fire on getting services")
+    	console.log(err);}, 3000);
+  });
+}
+
+
+console.log("App Started: " + Date().toString());
+
+// setup middleware
+var app = express();
+app.use(express.errorHandler());
+app.use(express.urlencoded()); // to support URL-encoded bodies
+app.use(app.router);
+
+app.use(express.static(__dirname + '/public')); //setup static public directory
+app.set('view engine', 'jade');
+app.set('views', __dirname + '/views'); //optional since express defaults to CWD/views
+
+// There are many useful environment variables available in process.env.
+// VCAP_APPLICATION contains useful information about a deployed application.
+var appInfo = JSON.parse(process.env.VCAP_APPLICATION || "{}");
+// TODO: Get application information and use it in your app.
+
+// defaults for dev outside bluemix
+var service_url = '<service_url>';
+var service_username = '<service_username>';
+var service_password = '<service_password>';
+var re_service_url = '<service_url>';
+var re_service_username = '<service_username>';
+var re_service_password = '<service_password>';
+var cloudant = '<cloudant credentials>';
+
 
 // Retrieve information from Bluemix Environment if possible
 if (process.env.VCAP_SERVICES) {
@@ -25,7 +73,42 @@ if (process.env.VCAP_SERVICES) {
 	  console.log('VCAP_SERVICES: %s', process.env.VCAP_SERVICES);
 	  // Also parse out Cloudant settings.
 	  var cloudant = env['cloudantNoSQLDB'][0]['credentials'];
-		isCloudant = true;
+		  try {
+    var service_name = 'language_identification';
+    if (services[service_name]) {
+      var svc = services[service_name][0].credentials;
+      service_url = svc.url;
+      service_username = svc.username;
+      service_password = svc.password;
+    } else {
+      console.log('The service '+service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
+    }
+  }
+  catch (e){
+    setTimeout(function() {
+        console.log("Catched Fire on getting services")
+        console.log(e);
+    }, 3000);
+  }
+
+  try {
+    var re_service_name = 'relationship_extraction';
+    if (services[re_service_name]) {
+      var re_svc = services[re_service_name][0].credentials;
+      re_service_url = re_svc.url;
+      re_service_username = re_svc.username;
+      re_service_password = re_svc.password;
+    } else {
+      console.log('The service '+re_service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
+    }
+  }
+  catch (e){
+    setTimeout(function() {
+        console.log("Catched Fire on getting services")
+        console.log(e);
+    }, 3000);
+  }
+
 }
 
 var port = (process.env.VCAP_APP_PORT || 1337);
@@ -34,40 +117,39 @@ var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 // Retrieve cloudant information from Linux Environment
 if (process.env.COUCH_HOST) {
           var cloudant = process.env['COUCH_HOST'];
-					isCloudant = true;
-					console.log (cloudant + " - isCloudant: true");
+					console.log (cloudant);
 }
 
+var auth = 'Basic ' + new Buffer(service_username + ':' + service_password).toString('base64');
+var re_auth = 'Basic ' + new Buffer(re_service_username + ':' + re_service_password).toString('base64');
 
-if (isCloudant) {
+
+console.log('service_url = ' + service_url);
+console.log('service_username = ' + service_username);
+console.log('service_password = ' + new Array(service_password.length).join("X"));
+console.log('re_service_url = ' + re_service_url);
+console.log('re_service_username = ' + re_service_username);
+console.log('re_service_password = ' + new Array(re_service_password.length).join("X"));
+console.log('cloudant = ' + cloudant);
+
+if (cloudant) {
 	var nano = require('nano')(cloudant);
 	var db_name = "twitter";
 	var db = nano.use(db_name);
+	//check if db exists, if not: creates it
 }
 
-function insert_doc(doc, tried) {
-	if (isCloudant) {
-	  db.insert(doc,
-	    function (error,http_body,http_headers) {
-	      if(error) {
-	        if(error.message === 'no_db_file'  && tried < 1) {
-	          // create database and retry
-	          return nano.db.create(db_name, function () {
-	            insert_doc(doc, tried+1);
-	          });
-	        }
-	        else { return console.log(error); }
-	      }
-	      console.log(http_body);
-	  });
-	}
+function insert_doc(doc) {
+	if (cloudant) {
+	  db.insert(doc, function (error,http_body,http_headers) {
+	      if(error) return console.log(error);
+	    });
+      // console.log(http_body);
+		}
 }
-
-  // insert_doc({nano: true}, 0);
 
 // TODO: Get application information and use it in your app.
 // var twitterInfo = JSON.parse(process.env.TWITTER_INFO || "{}");
-
 var configTwitter = require('./twitter-cred.json');
 var twit = new twitter(configTwitter);
 
@@ -76,13 +158,9 @@ twit.stream('user', {track:'pcolazurdo'}, function(stream) {
         //console.log(typeof data.target_object);
 				//console.log(typeof data.id_str);
 				//console.log(util.inspect(data));
-				// only insert tweets
-				if (typeof data.id_str !== 'undefined') {
-					console.log("Inserting new doc on CouchDB");
-					insert_doc(data, data.id_str, function (err, response) {
-				  	console.log(err || response);
-				  });
-				};
+
+				// Only insert tweets
+				if (typeof data.id_str !== 'undefined') insert_doc(data);
     });
     //stream.on('favorite', function(data) {
     //    console.log(data.target_object.text);
@@ -94,38 +172,237 @@ twit.stream('user', {track:'pcolazurdo'}, function(stream) {
     //setTimeout(stream.destroy, 5000);
 });
 
-//Create a Webserver and wait for REST API CRUD calls
-require('http').createServer(function(req, res) {
-	//Set up the DB connection
-	 if (process.env.VCAP_SERVICES) {
-		  // Running on Bluemix. Parse for  the port and host that we've been assigned.
-		  var env = JSON.parse(process.env.VCAP_SERVICES);
-		  var host = process.env.VCAP_APP_HOST;
-		  var port = process.env.VCAP_APP_PORT;
+//
+// API REST
+//
+app.get( '/api', function( request, response ) {
+    var resp = [
+            {
+                Application: "watson-pcolazurdo",
+                ServiceUrl: service_url,
+                Status: "Ok"
+            }
+        ];
+    console.log("GET /api");
 
-		  console.log('VCAP_SERVICES: %s', process.env.VCAP_SERVICES);
+    response.send(resp);
+});
 
-		  // Also parse out Cloudant settings.
-		  var cloudant = env['cloudantNoSQLDB'][0]['credentials'];
-	 }
+app.get( '/api/log/:text', function( request, response ) {
+    console.log("GET /api/log/*");
+    var resp = [
+            {
+                Application: "watson-pcolazurdo",
+                ServiceUrl: service_url,
+                Status: "Ok",
+                Log: request.params.text
+            }
+        ];
+
+    response.send(resp);
+});
+
+app.post( '/api/log/:text', function( request, response ) {
+    console.log("POST /api/log/*");
+    var resp = [
+            {
+                Application: "watson-pcolazurdo",
+                ServiceUrl: service_url,
+                Status: "Ok",
+                Log: request.params.text
+            }
+        ];
+
+    response.send(resp);
+});
+
+app.get( '/api/lid/:text', function( request, response) {
+  var request_data = {
+    'txt': request.params.text,
+    'sid': 'lid-generic',  // service type : language identification (lid)
+    'rt':'json' // return type e.g. json, text or xml
+  };
+
+  var parts = url.parse(service_url); //service address
+
+  // create the request options to POST our question to Watson
+  var options = { host: parts.hostname,
+    port: parts.port,
+    path: parts.pathname,
+    method: 'POST',
+    headers: {
+      'Content-Type'  :'application/x-www-form-urlencoded', // only content type supported
+      'X-synctimeout' : '30',
+      'Authorization' :  auth }
+  };
+
+  // Create a request to POST to the Watson service
+  var watson_req = https.request(options, function(result) {
+    result.setEncoding('utf-8');
+    var responseString = '';
+
+    result.on("data", function(chunk) {
+      responseString += chunk;
+    });
+
+    result.on('end', function() {
+      try {
+        var lang = JSON.parse(responseString).lang;
+        return response.send({ 'txt': request.params.text, 'lang': lang });
+      }
+      catch (e) {
+        console.log("Catched Fire on result.on (end)")
+        console.log(e);
+      }
+
+    })
+
+  });
+
+  // create the request to Watson
+  try {
+    watson_req.write(querystring.stringify(request_data));
+    watson_req.end();
+  }
+  catch (e) {
+    console.log("Catched Fire on watson_req.write")
+    console.log(e);
+  }
+});
 
 
-	  // Insert document
-	  if(req.method == 'POST') {
-	             insert_records(req,res);
-	  }
-	  // List documents
-	  else if(req.method == 'GET') {
-	          list_records(req,res);
-	   }
-	   // Update a document
-	   else if(req.method == 'PUT') {
-	          update_records(req,res);
-	    }
-	    // Delete a document
-	     else if(req.method == 'DELETE') {
-	          delete_record(req,res);
-	    }
+app.get( '/api/re/:text', function( request, response) {
 
-}).listen(port, host);
+});
+
+
+
+//
+// PAGES
+//
+
+
+// render index page
+app.get('/', function(req, res){
+    console.log("GET /");
+    res.render('index');
+});
+
+
+// Handle the form POST containing the text to identify with Watson and reply with the language
+app.post('/', function(req, res){
+  console.log("POST /");
+  var request_data = {
+    'txt': req.body.txt,
+    'sid': 'lid-generic',  // service type : language identification (lid)
+    'rt':'json' // return type e.g. json, text or xml
+  };
+
+  var parts = url.parse(service_url); //service address
+
+  // create the request options to POST our question to Watson
+  var options = { host: parts.hostname,
+    port: parts.port,
+    path: parts.pathname,
+    method: 'POST',
+    headers: {
+      'Content-Type'  :'application/x-www-form-urlencoded', // only content type supported
+      'X-synctimeout' : '30',
+      'Authorization' :  auth }
+  };
+
+  // Create a request to POST to the Watson service
+  var watson_req = https.request(options, function(result) {
+    result.setEncoding('utf-8');
+    var responseString = '';
+
+    result.on("data", function(chunk) {
+      responseString += chunk;
+    });
+
+    result.on('end', function() {
+      var lang = JSON.parse(responseString).lang;
+      return res.render('index',{ 'txt': req.body.txt, 'lang': lang });
+    })
+
+  });
+
+  watson_req.on('error', function(e) {
+    return res.render('index', {'error':e.message})
+  });
+
+  // create the request to Watson
+  watson_req.write(querystring.stringify(request_data));
+  watson_req.end();
+
+});
+
+
+app.get('/re', function(req, res){
+    res.render('re_index');
+});
+
+// Handle the form POST containing the text to identify with Watson and reply with the language
+app.post('/re', function(req, res){
+  try {
+    var parts = url.parse(re_service_url);
+
+    // create the request options from our form to POST to Watson
+    var options = {
+      host: parts.hostname,
+      port: parts.port,
+      path: parts.pathname,
+      method: 'POST',
+      headers: {
+        'Content-Type'  :'application/x-www-form-urlencoded',
+        'X-synctimeout' : '30',
+        'Authorization' :  auth }
+    };
+  }
+  catch (e){
+    console.log("Error: " + e);
+    //res.render('error', {'error': e.message});
+  }
+
+  // Create a request to POST to Watson
+  try{
+    var watson_req = https.request(options, function(result) {
+      result.setEncoding('utf-8');
+      var resp_string = '';
+
+      result.on("data", function(chunk) {
+        resp_string += chunk;
+      });
+
+      result.on('end', function() {
+        try{
+          return res.render('re_index',{'xml':xmlescape(resp_string), 'text':req.body.txt})
+        } catch (e){
+          console.log("Error: " + e);
+          //res.render('error', {'error': e.message});
+        }
+      })
+    });
+  } catch (e){
+    console.log("Error: " + e);
+    //res.render('error', {'error': e.message});
+  }
+
+  watson_req.on('error', function(e) {
+    return res.render('re_index', {'error':e.message})
+  });
+
+  // Wire the form data to the service
+  console.log("Query String on RE:" + querystring.stringify(req.body));
+  try {
+    watson_req.write(querystring.stringify(req.body));
+    watson_req.end();
+  } catch (e){
+    console.log("Error: " + e);
+    //res.render('error', {'error': e.message});
+  }
+});
+
+
+app.listen(port, host);
 console.log("Connected to port =" + port + " host =  " + host);
