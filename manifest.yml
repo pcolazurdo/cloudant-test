@@ -1,8 +1,9 @@
 applications:
-- name: bm-cloudant
-  memory: 256M
-  instances: 1
-  host: bm-cloudant
-  domain: mybluemix.net
-  path: .
+- services:
+  - "Language Identification-bk"
+  - "Relationship Extraction-5e"
+  - "Cloudant NoSQL DB-qa"
+  name: pcolaz01
   command: node app.js
+  path: .
+  memory: 128M

@@ -68,8 +68,8 @@ var cloudant = '<cloudant credentials>';
 if (process.env.VCAP_SERVICES) {
 	  // Running on Bluemix. Parse the process.env for the port and host that we've been assigned.
 	  var env = JSON.parse(process.env.VCAP_SERVICES);
-	  var host = process.env.VCAP_APP_HOST;
-	  var port = process.env.VCAP_APP_PORT;
+	  var host = process.env.VCAP_APP_HOST || '127.0.0.1';
+	  var port = process.env.VCAP_APP_PORT || 3000;
 	  console.log('VCAP_SERVICES: %s', process.env.VCAP_SERVICES);
 	  // Also parse out Cloudant settings.
 	  var cloudant = env['cloudantNoSQLDB'][0]['credentials'];
@@ -111,8 +111,8 @@ if (process.env.VCAP_SERVICES) {
 
 }
 
-var port = (process.env.VCAP_APP_PORT || 1337);
-var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
+var host = process.env.VCAP_APP_HOST || '127.0.0.1';
+var port = process.env.VCAP_APP_PORT || 3000;
 
 // Retrieve cloudant information from Linux Environment
 if (process.env.COUCH_HOST) {
@@ -132,13 +132,23 @@ console.log('re_service_username = ' + re_service_username);
 console.log('re_service_password = ' + new Array(re_service_password.length).join("X"));
 console.log('cloudant = ' + cloudant);
 
+// Setup Cloudant connection
 if (cloudant) {
 	var nano = require('nano')(cloudant);
 	var db_name = "twitter";
+	//try creating the database. If it already exists it will log a message.
+	nano.db.create(db_name, function (error, body, headers) {
+    if(error) {
+			console.log ("Error while creating the database " + db_name);
+			console.log (error.message);
+			console.log (error['status-code']);
+		}
+	});
 	var db = nano.use(db_name);
-	//check if db exists, if not: creates it
 }
 
+
+// Function to insert a new Doc into the Cloudant database
 function insert_doc(doc) {
 	if (cloudant) {
 	  db.insert(doc, function (error,http_body,http_headers) {
@@ -157,7 +167,7 @@ twit.stream('user', {track:'pcolazurdo'}, function(stream) {
     stream.on('data', function(data) {
         //console.log(typeof data.target_object);
 				//console.log(typeof data.id_str);
-				//console.log(util.inspect(data));
+				console.log(util.inspect(data));
 
 				// Only insert tweets
 				if (typeof data.id_str !== 'undefined') insert_doc(data);
@@ -171,6 +181,8 @@ twit.stream('user', {track:'pcolazurdo'}, function(stream) {
     // Disconnect stream after five seconds
     //setTimeout(stream.destroy, 5000);
 });
+
+
 
 //
 // API REST
@@ -403,6 +415,5 @@ app.post('/re', function(req, res){
   }
 });
 
-
-app.listen(port, host);
 console.log("Connected to port =" + port + " host =  " + host);
+app.listen(port, host);
