@@ -266,7 +266,6 @@ app.get( '/api/lid/:text', function( request, response) {
         console.log("Catched Fire on result.on (end)")
         console.log(e);
       }
-
     })
 
   });
@@ -352,6 +351,25 @@ app.post('/', function(req, res){
 
 app.get('/re', function(req, res){
     res.render('re_index');
+});
+
+
+var count = 0;
+app.get('/status', function(req, res){
+
+	db.view("design1", "countView", {"group": true, "reduce": true}, function(err, body) {
+		if (!err) {
+			console.log(body);
+  		body.rows.forEach(function(doc) {
+				count = doc.value;
+				res.render('status', {'count': count});
+			});
+		} else {
+			res.render('status', {'error': err});
+		}
+	});
+
+	//console.log(count);
 });
 
 // Handle the form POST containing the text to identify with Watson and reply with the language
