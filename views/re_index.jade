@@ -1,0 +1,43 @@
+//- index.jade
+extends ./re_layout.jade
+
+block row-content
+  div.row
+    div.col-lg-6
+        h2 Try the service
+        div.well
+          form.form-horizontal(method='post')
+            fieldset
+              div.form-group.row
+                div.col-lg-12
+                  label.control-label(for='textArea') Enter or paste the text of a news article
+                  textarea#textArea.form-control(name="txt", rows='12', required="true") #{text}
+                  span.help-block
+                    | The model is adapted to a news domain, so news articles will give the best results.
+              div.form-group.row
+                label.col-lg-12.control-label(for='select') Select SIRE model:
+                div.col-lg-12
+                  select#select.form-control(name='sid')
+                    option(value='ie-en-news') English News
+                    option(value='ie-es-news')  Spanish News
+              div.form-group.row(style='margin-bottom: 0px; padding-top: 5px;')
+                div.col-lg-5.col-lg-push-7
+                  input(type='hidden', name='rt', value='xml')
+                  button.btn.btn-block(type='submit') Analyze
+      div.col-lg-6
+        h2 Output
+        if xml
+          p.help-block
+            | The Relationship Extrcation service outputs the extracted
+            | metadata in an XML format known as "DOCXML"
+          pre
+            code.language-markup
+              != xml
+        if error
+          h2 Output
+          div.row
+            div.col-lg-12
+              div.well
+                div.row
+                  div.col-lg-12
+                    p(style="font-weight:bold;color:red;") Error: #{error}

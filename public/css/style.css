@@ -1,0 +1,31 @@
+/* style.css
+ * This file provides css styles.
+ */
+
+
+h2 {
+  color: #BA006E !important;
+  background-color: white !important;
+  font-weight: 200;
+}
+
+.header {
+  background-color: white !important;
+}
+
+.ORGANIZATION {
+background-color: #BA006E; /* IBM's PINK3 */
+color: white;
+}
+.EVENT_COMMUNICATION {
+background-color: #00B2EF; /* IBM's BLUE3 */
+color: white;
+}
+.DATE {
+background-color: #00A6A0; /* IBM's TEAL1 */
+color: white;
+}
+.PERCENT {
+background-color: #FFE14F; /* IBM's YELLOW1 */
+color: white;
+}

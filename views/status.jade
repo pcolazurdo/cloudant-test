@@ -1,0 +1,18 @@
+//- index.jade
+extends ./layout.jade
+
+block row-content
+  div.row
+    div.col-lg-6
+      h2 Document Count
+      if count
+        div.well
+          div.form-group.row
+            div.col-lg-12
+              p
+                b #{count}
+      else if error
+        div.well
+          div.form-group.row
+            div.col-lg-12
+            p(style="font-weight:bold;color:red;") Error: #{error}

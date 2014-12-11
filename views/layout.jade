@@ -1,0 +1,36 @@
+//- layout.jade
+doctype html
+html(lang="en")
+  head
+    block title
+      title pcolazurdo - Needing some cognitive helper - Trying Watson!
+    meta(charset="utf-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+
+    link(rel="shortcut icon", href="/images/favicon.ico", type="image/x-icon")
+    link(rel="icon", href="/images/favicon.ico", type="image/x-icon")
+    link(rel="stylesheet", href="/css/watson-bootstrap-dark.css")
+    link(rel="stylesheet", href="/css/browser-compatibility.css")
+    link(rel="stylesheet", href="/css/watson-code.css")
+    link(rel="stylesheet", href="/css/style.css")
+
+  body
+    div.container
+      div.header.row
+        div.col-lg-3
+          img(src="/images/brain-xxl.png" style="height: 128px;")
+        div.col-lg-8
+          h2 Not sure what you're friends are talking about?
+          p Try at least to identify what language they are using.
+            | Based on this <a href='http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/lidapi/'> IBM provided sample concept </a>
+      block row-content
+
+      #footer
+            .container
+                p(class="text-muted credit")
+                    | follow me at <a href="http://twitter.com/pcolazurdo"> @pcolazurdo </a>
+
+    script(src="/js/jquery.js")
+    script(src="/js/bootstrap.min.js")
+    script(type='text/javascript', src="/js/css_browser_selector.js")

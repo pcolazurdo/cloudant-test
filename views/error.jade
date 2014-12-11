@@ -1,0 +1,12 @@
+//- error.jade
+extends ./layout.jade
+
+block row-content
+  div.row
+    div.col-lg-6
+      h2 There was an error
+      if error
+        div.well
+          div.form-group.row
+            div.col-lg-12
+            p(style="font-weight:bold;color:red;") Error: #{error}

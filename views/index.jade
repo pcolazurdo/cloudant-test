@@ -1,0 +1,31 @@
+//- index.jade
+extends ./layout.jade
+
+block row-content
+  div.row
+    div.col-lg-6
+      h2 Try the service
+      div.well
+        form.form-horizontal(method='post')
+          fieldset
+            div.form-group.row
+              div.col-lg-12
+                textarea#textArea.form-control(name="txt", rows='12', placeholder="Please enter 10 or more unique words...",
+                  required="true") #{txt}
+            div.form-group.row(style='margin-bottom: 0px; padding-top: 5px;')
+              div.col-lg-4.col-lg-push-8
+                input(type='hidden', name='dataset',value=1)
+                button.btn.btn-block(type='submit') Submit
+    div.col-lg-6
+      h2 Output
+      if lang
+        div.well
+          div.form-group.row
+            div.col-lg-12
+              p
+                b #{lang}
+      else if error
+        div.well
+          div.form-group.row
+            div.col-lg-12
+            p(style="font-weight:bold;color:red;") Error: #{error}
