@@ -372,6 +372,27 @@ app.get('/status', function(req, res){
 	//console.log(count);
 });
 
+
+values = new Array();
+app.get('/status0', function(req, res){
+	db.view("design1", "timestampView", {"group": true, "reduce": true}, function(err, body) {
+		if (!err) {
+			body.rows.forEach(function(doc) {
+				//console.log(doc);
+				values.push ([doc.key, doc.value]);
+			});
+			console.log(values);
+			res.render('status0', {'values': JSON.stringify(values)});
+		} else {
+			res.render('status0', {'error': err});
+		}
+	});
+
+	//console.log(count);
+});
+
+
+
 // Handle the form POST containing the text to identify with Watson and reply with the language
 app.post('/re', function(req, res){
   try {
