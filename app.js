@@ -373,8 +373,9 @@ app.get('/status', function(req, res){
 });
 
 
-values = new Array();
+
 app.get('/status0', function(req, res){
+	values = new Array();
 	db.view("design1", "timestampView", {"group": true, "reduce": true}, function(err, body) {
 		if (!err) {
 			body.rows.forEach(function(doc) {

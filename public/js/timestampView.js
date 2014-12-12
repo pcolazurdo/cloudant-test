@@ -1,12 +1,5 @@
 $(function() {
   var d = getValues();
-  // first correct the timestamps - they are recorded as the daily
-  // midnights in UTC+0100, but Flot always displays dates in UTC
-  // so we have to add one hour to hit the midnights in the plot
-
-  for (var i = 0; i < d.length; ++i) {
-    d[i][0] += 60 * 60 * 1000;
-  }
 
   // helper for returning the weekends in a period
 
@@ -42,7 +35,7 @@ $(function() {
         mode: "x"
       },
       grid: {
-        markings: weekendAreas
+        //markings: weekendAreas
       }
     };
 
@@ -72,7 +65,7 @@ $(function() {
 
     // now connect the two
 
-    $("#placeholder").bind("plotselected", function (event, ranges) {
+    $("#flot-placeholder1").bind("plotselected", function (event, ranges) {
 
       // do the zooming
       $.each(plot.getXAxes(), function(_, axis) {
@@ -89,7 +82,7 @@ $(function() {
       overview.setSelection(ranges, true);
     });
 
-    $("#overview").bind("plotselected", function (event, ranges) {
+    $("#flot-overview1").bind("plotselected", function (event, ranges) {
       plot.setSelection(ranges);
     });
 
