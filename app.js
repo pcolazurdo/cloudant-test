@@ -399,7 +399,7 @@ app.get('/status0', function(req, res){
 			res.render('status0', {'values': JSON.stringify(values)});
 		} else {
 			res.render('status0', {'error': err});
-		}
+		}		
 	});
 	//console.log(count);
 });
