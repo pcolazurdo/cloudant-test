@@ -158,6 +158,27 @@ function insert_doc(doc) {
 		}
 }
 
+// Function to count documents in the db
+function countView(callback) {
+	var count = 0;
+	var status;
+	db.view("design1", "countView", {"group": true, "reduce": true}, function(err, body) {
+		if (!err) {
+			//console.log(body);
+			body.rows.forEach(function(doc) {
+				count = doc.value;
+				status = {'count': count};
+			});
+		} else {
+			console.log(err);
+			status = {'error': err};
+		}
+		console.log("status", status);
+		callback(status);
+	});
+
+}
+
 // TODO: Get application information and use it in your app.
 // var twitterInfo = JSON.parse(process.env.TWITTER_INFO || "{}");
 var configTwitter = require('./twitter-cred.json');
@@ -354,22 +375,14 @@ app.get('/re', function(req, res){
 });
 
 
-var count = 0;
-app.get('/status', function(req, res){
 
-	db.view("design1", "countView", {"group": true, "reduce": true}, function(err, body) {
-		if (!err) {
-			console.log(body);
-  		body.rows.forEach(function(doc) {
-				count = doc.value;
-				res.render('status', {'count': count});
-			});
-		} else {
-			res.render('status', {'error': err});
-		}
+
+app.get('/status', function(req, res){
+  countView( function (countStatus) {
+		//console.log("countStatus", countStatus);
+		res.render('status', countStatus);
 	});
 
-	//console.log(count);
 });
 
 
@@ -382,13 +395,12 @@ app.get('/status0', function(req, res){
 				//console.log(doc);
 				values.push ([doc.key, doc.value]);
 			});
-			console.log(values);
+			//console.log(values);
 			res.render('status0', {'values': JSON.stringify(values)});
 		} else {
 			res.render('status0', {'error': err});
 		}
 	});
-
 	//console.log(count);
 });
 
