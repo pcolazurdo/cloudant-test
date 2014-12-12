@@ -1,0 +1,22 @@
+{
+   "_id": "_design/design1",
+   "views": {
+       "countView": {
+           "reduce": "_sum",
+           "map": "function(doc) {\n  emit(\"count\", 1);\n}"
+       },
+       "timestampView": {
+           "reduce": "_sum",
+           "map": "function(doc) {\n  emit(Math.round(doc.timestamp_ms/(60*60)), 1);\n}"
+       },
+       "userCountView": {
+           "reduce": "_sum",
+           "map": "function(doc) {\n  emit(doc.user.screen_name, 1);\n}"
+       },
+       "userReachView": {
+           "reduce": "_sum",
+           "map": "function(doc) {\n  emit(doc.user.screen_name, doc.user.followers_count);\n}"
+       }
+   },
+   "language": "javascript"
+}
