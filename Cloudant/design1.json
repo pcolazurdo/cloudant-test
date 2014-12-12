@@ -7,7 +7,7 @@
        },
        "timestampView": {
            "reduce": "_sum",
-           "map": "function(doc) {\n  emit(Math.round(doc.timestamp_ms/(60*60)), 1);\n}"
+           "map": "function(doc) {\n  emit(Math.round(doc.timestamp_ms/(60*60))*60*60, 1);\n}"
        },
        "userCountView": {
            "reduce": "_sum",

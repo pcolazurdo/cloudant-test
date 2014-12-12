@@ -36,7 +36,7 @@ $(function() {
     var options = {
       xaxis: {
         mode: "time",
-        tickLength: 5
+        //tickLength: 5
       },
       selection: {
         mode: "x"
