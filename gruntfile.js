@@ -31,15 +31,20 @@ module.exports = function(grunt) {
 				command: function () {
 					return 'git status';
 				}
-			},
-			getappname: {
+			},	
+			gitadd: {
 				command: function () {
-					try {
-						var doc = yaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
-						console.log(doc);						
-					} catch (e) {
-						console.log(e);
-					}
+					return 'git add .';
+				}
+			},
+			gitcommit: {
+				command: function () {
+					return 'git commit -a -m "new commit"';
+				}
+			},
+			gistpush: {
+				command: function () {
+					return 'git push origin master';
 				}
 			}			
 		}
@@ -59,8 +64,13 @@ module.exports = function(grunt) {
 	]);
 	grunt.registerTask('status', [		
 		'shell:gitstatus',
-		'shell:cfstatus'
-		
+		'shell:cfstatus'		
+	]);
+	
+	grunt.registerTask('gitcommit', [
+		'shell:gitadd',
+		'shell:gitcommit',
+		'shell:gitpush'
 	]);
 	
 	grunt.registerTask('default', ['status']);
