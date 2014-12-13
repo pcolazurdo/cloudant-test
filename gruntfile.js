@@ -42,7 +42,7 @@ module.exports = function(grunt) {
 					return 'git commit -a -m "new commit"';
 				}
 			},
-			gistpush: {
+			gitpush: {
 				command: function () {
 					return 'git push origin master';
 				}
