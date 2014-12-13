@@ -12,8 +12,7 @@
     "jade": "1.1.4",
     "log4js": "^0.6.21",
     "twitter": "^0.2.12",
-    "xml-escape": "^1.0.0",
-    "twitter": "^0.2.12"
+    "xml-escape": "^1.0.0"
   },
   "repository": "",
   "keywords": [
@@ -23,5 +22,12 @@
   ],
   "author": "",
   "license": "BSD",
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-env": "^0.4.2",
+    "grunt-git": "^0.3.2",
+    "grunt-shell": "^1.1.1",
+    "js-yaml": "^3.2.3"
+  }
 }
