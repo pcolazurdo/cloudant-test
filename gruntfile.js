@@ -4,22 +4,29 @@ fs = require('fs');
 
 module.exports = function(grunt) {
 	grunt.initConfig({
-		shell: {			
+		shell: {
 			cfpush: {
 				command: function () {
+					grunt.file.delete ("output.log");
 					return 'cf push' ;
 				}
-			},	   
+			},
 			cfstart: {
 				command: function () {
-					return 'cf start';
+					try {
+						var doc = JSON.parse(JSON.stringify(yaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'))));
+						//console.log(doc);
+					} catch (e) {
+						console.log(e);
+					}
+					return 'cf start ' + doc.applications[0].name;
 				}
 			},
 			cfstatus: {
 				command: function () {
 					try {
 						var doc = JSON.parse(JSON.stringify(yaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'))));
-						//console.log(doc);						
+						//console.log(doc);
 					} catch (e) {
 						console.log(e);
 					}
@@ -31,7 +38,7 @@ module.exports = function(grunt) {
 				command: function () {
 					return 'git status';
 				}
-			},	
+			},
 			gitadd: {
 				command: function () {
 					return 'git add .';
@@ -46,35 +53,33 @@ module.exports = function(grunt) {
 				command: function () {
 					return 'git push origin master';
 				}
-			}			
+			}
 		}
 	});
 	grunt.loadNpmTasks('grunt-git');
-	grunt.loadNpmTasks('grunt-shell');	
+	grunt.loadNpmTasks('grunt-shell');
 	//grunt.loadNpmTasks('grunt-env');
-	
+
 	// bluemix
 	grunt.registerTask('push bluemix', [
 		'shell:cfpush',
 		'shell:cfstart'
 	]);
-	
-	grunt.registerTask('deploy', [		
-		'push bluemix'		
+
+	grunt.registerTask('deploy', [
+		'push bluemix'
 	]);
-	grunt.registerTask('status', [		
+
+	grunt.registerTask('status', [
 		'shell:gitstatus',
-		'shell:cfstatus'		
+		'shell:cfstatus'
 	]);
-	
+
 	grunt.registerTask('gitcommit', [
 		'shell:gitadd',
 		'shell:gitcommit',
 		'shell:gitpush'
 	]);
-	
+
 	grunt.registerTask('default', ['status']);
 };
-
-
-

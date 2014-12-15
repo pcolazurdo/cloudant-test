@@ -31,8 +31,9 @@ var logger = log4js.getLogger();
 if (env != 'PROD') {
 	process.on('uncaughtException', function(err) {
     setTimeout(function() {
-    	console.log("Catched Fire on getting services")
-    	console.log(err);}, 3000);
+    	console.log("Catched Fire on an Unhandled Error!")
+    	console.log(err);
+			}, 3000);
   });
 }
 
@@ -67,28 +68,28 @@ var cloudant = '<cloudant credentials>';
 // Retrieve information from Bluemix Environment if possible
 if (process.env.VCAP_SERVICES) {
 	  // Running on Bluemix. Parse the process.env for the port and host that we've been assigned.
-	  var env = JSON.parse(process.env.VCAP_SERVICES);
+	  var services = JSON.parse(process.env.VCAP_SERVICES);
 	  var host = process.env.VCAP_APP_HOST || '127.0.0.1';
 	  var port = process.env.VCAP_APP_PORT || 3000;
 	  console.log('VCAP_SERVICES: %s', process.env.VCAP_SERVICES);
 	  // Also parse out Cloudant settings.
-	  var cloudant = env['cloudantNoSQLDB'][0]['credentials'];
+	  var cloudant = services['cloudantNoSQLDB'][0]['credentials'];
 		  try {
-    var service_name = 'language_identification';
-    if (services[service_name]) {
-      var svc = services[service_name][0].credentials;
-      service_url = svc.url;
-      service_username = svc.username;
-      service_password = svc.password;
-    } else {
-      console.log('The service '+service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
-    }
-  }
-  catch (e){
-    setTimeout(function() {
-        console.log("Catched Fire on getting services")
-        console.log(e);
-    }, 3000);
+    		var service_name = 'language_identification';
+    		if (services[service_name]) {
+      		var svc = services[service_name][0].credentials;
+      		service_url = svc.url;
+      		service_username = svc.username;
+      		service_password = svc.password;
+    		} else {
+      		console.log('The service '+service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
+    		}
+  		}
+  		catch (e){
+    		setTimeout(function() {
+        	console.log("Catched Fire on getting services")
+        	console.log(e);
+    		}, 3000);
   }
 
   try {
@@ -189,10 +190,14 @@ twit.stream('user', {track:'pcolazurdo'}, function(stream) {
         //console.log(typeof data.target_object);
 				//console.log(typeof data.id_str);
 				console.log(util.inspect(data));
-
 				// Only insert tweets
 				if (typeof data.id_str !== 'undefined') insert_doc(data);
     });
+		stream.on('error', function(data) {
+				//console.log(typeof data.target_object);
+				//console.log(typeof data.id_str);
+				console.log(util.inspect(data));
+		});
     //stream.on('favorite', function(data) {
     //    console.log(data.target_object.text);
     //    insert_doc(data, data.target_object.id_str, function (err, response) {
@@ -399,7 +404,7 @@ app.get('/status0', function(req, res){
 			res.render('status0', {'values': JSON.stringify(values)});
 		} else {
 			res.render('status0', {'error': err});
-		}		
+		}
 	});
 	//console.log(count);
 });
