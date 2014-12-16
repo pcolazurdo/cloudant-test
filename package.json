@@ -1,8 +1,8 @@
 {
-  "name": "ibm-cloudant",
+  "name": "pcolaz01",
   "version": "0.1.0",
-  "description": "ibm-cloudant",
-  "main": "hello-world-server.js",
+  "description": "pcolaz01",
+  "main": "Trying to use some bluemix goodies!",
   "scripts": {
     "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1",
     "start": "node app.js"
@@ -12,7 +12,7 @@
     "express": "3.4.7",
     "jade": "1.1.4",
     "log4js": "^0.6.21",
-    "twitter": "^0.2.12",
+    "twitter": "^1.0.1",
     "xml-escape": "^1.0.0"
   },
   "repository": "",
