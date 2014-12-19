@@ -174,7 +174,7 @@ function countView(callback) {
 			console.log(err);
 			status = {'error': err};
 		}
-		console.log("status", status);
+		//console.log("status", status);
 		callback(status);
 	});
 
@@ -189,7 +189,7 @@ twit.stream('user', {track:'pcolazurdo'}, function(stream) {
     stream.on('data', function(data) {
         //console.log(typeof data.target_object);
 				//console.log(typeof data.id_str);
-				console.log(util.inspect(data));
+				//console.log(util.inspect(data));
 				// Only insert tweets
 				if (typeof data.id_str !== 'undefined') insert_doc(data);
     });
@@ -198,7 +198,7 @@ twit.stream('user', {track:'pcolazurdo'}, function(stream) {
 				//console.log(typeof data.id_str);
 				console.log(util.inspect(data));
 		});
-    stream.on('favorite', function(data) {
+    //stream.on('favorite', function(data) {
     //    console.log(data.target_object.text);
     //    insert_doc(data, data.target_object.id_str, function (err, response) {
     //        console.log(err || response);
@@ -387,7 +387,6 @@ app.get('/status', function(req, res){
 		//console.log("countStatus", countStatus);
 		res.render('status', countStatus);
 	});
-
 });
 
 
