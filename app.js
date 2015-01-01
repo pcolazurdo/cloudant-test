@@ -162,14 +162,23 @@ function insert_doc(doc) {
 // Function to count documents in the db
 function countView(callback) {
 	var count = 0;
+	var lastTimeStamp = 0;
 	var status;
 	db.view("design1", "countView", {"group": true, "reduce": true}, function(err, body) {
 		if (!err) {
 			//console.log(body);
 			body.rows.forEach(function(doc) {
 				count = doc.value;
-				status = {'count': count};
 			});
+			db.view("design1", "lastTimeView", {"group": true, "limit": 1, "descending": true}, function(err, body) {
+				if (!err) {
+					//console.log(body);
+					body.rows.forEach(function(doc) {
+						console.log("doc", doc);
+						lastTimeStamp = doc.value;
+
+					});
+			status = {'count': count, 'lasttimestamp': lastTimeStamp};
 		} else {
 			console.log(err);
 			status = {'error': err};
