@@ -165,28 +165,31 @@ function countView(callback) {
 	var lastTimeStamp = 0;
 	var status;
 	db.view("design1", "countView", {"group": true, "reduce": true}, function(err, body) {
-		if (!err) {
+		if (err) {
+			console.log(err);
+			status = {'error': err};
+		} else {
 			//console.log(body);
 			body.rows.forEach(function(doc) {
 				count = doc.value;
 			});
-			db.view("design1", "lastTimeView", {"group": true, "limit": 1, "descending": true}, function(err, body) {
-				if (!err) {
+			db.view("design1", "lastTimeView", {"group": false, "limit": 1, "descending": true}, function(err, body) {
+				if (err) {
+					console.log(err);
+					status = {'error': err};
+				} else {
 					//console.log(body);
 					body.rows.forEach(function(doc) {
-						console.log("doc", doc);
-						lastTimeStamp = doc.value;
-
+						//console.log("doc", doc);
+						var date = new Date(parseInt(doc.key));
+						status = {'count': count, 'lasttimestamp': date};
 					});
-			status = {'count': count, 'lasttimestamp': lastTimeStamp};
-		} else {
-			console.log(err);
-			status = {'error': err};
-		}
-		//console.log("status", status);
-		callback(status);
-	});
+				}
+				callback(status);
+			}
+		)};
 
+	});
 }
 
 // TODO: Get application information and use it in your app.
