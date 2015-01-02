@@ -173,7 +173,7 @@ function countView(callback) {
 			body.rows.forEach(function(doc) {
 				count = doc.value;
 			});
-			db.view("design1", "lastTimeView", {"group": false, "limit": 1, "descending": true}, function(err, body) {
+			db.view("design1", "lastTimeView", {"limit": 1, "descending": true}, function(err, body) {
 				if (err) {
 					console.log(err);
 					status = {'error': err};
@@ -188,7 +188,6 @@ function countView(callback) {
 				callback(status);
 			}
 		)};
-
 	});
 }
 

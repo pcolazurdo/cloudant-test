@@ -1,22 +1,25 @@
 {
-   "_id": "_design/design1",
-   "views": {
-       "countView": {
-           "reduce": "_sum",
-           "map": "function(doc) {\n  emit(\"count\", 1);\n}"
-       },
-       "timestampView": {
-           "reduce": "_sum",
-           "map": "function(doc) {\n  emit(Math.round(doc.timestamp_ms/(1000*60*60))*1000*60*60, 1);\n}"
-       },
-       "userCountView": {
-           "reduce": "_sum",
-           "map": "function(doc) {\n  emit(doc.user.screen_name, 1);\n}"
-       },
-       "userReachView": {
-           "reduce": "_sum",
-           "map": "function(doc) {\n  emit(doc.user.screen_name, doc.user.followers_count);\n}"
-       }
-   },
-   "language": "javascript"
+  "_id": "_design/design1",
+  "views": {
+    "countView": {
+      "reduce": "_sum",
+      "map": "function(doc) {\n  emit(\"count\", 1);\n}"
+    },
+    "timestampView": {
+      "reduce": "_sum",
+      "map": "function(doc) {\n  emit(Math.round(doc.timestamp_ms/(1000*60*60))*1000*60*60, 1);\n}"
+    },
+    "userCountView": {
+      "reduce": "_sum",
+      "map": "function(doc) {\n  emit(doc.user.screen_name, 1);\n}"
+    },
+    "userReachView": {
+      "reduce": "_sum",
+      "map": "function(doc) {\n  emit(doc.user.screen_name, doc.user.followers_count);\n}"
+    },
+    "lastTimeView": {
+      "map": "function(doc){\r\n    if(doc.timestamp_ms){\r\n        emit(doc.timestamp_ms, null);\r\n    }\r\n}"
+    }
+  },
+  "language": "javascript"
 }
