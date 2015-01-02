@@ -21,7 +21,7 @@ var env = process.env.NODE_ENV || 'DEV';
 
 // Setup logging
 log4js.loadAppender('file');
-log4js.addAppender(log4js.appenders.file('output.log',null,10000000000));
+log4js.addAppender(log4js.appenders.file('output.log',null,1000000000));
 log4js.replaceConsole() // the important part
 var logger = log4js.getLogger();
 // End Setup logging
