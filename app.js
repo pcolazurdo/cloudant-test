@@ -394,30 +394,23 @@ app.get('/re', function(req, res){
 
 
 app.get('/status', function(req, res){
-  countView( function (countStatus) {
-		//console.log("countStatus", countStatus);
-		res.render('status', countStatus);
+	countView( function (countStatus) {
+		values = new Array();
+		db.view("design1", "timestampView", {"group": true, "reduce": true}, function(err, body) {
+			if (!err) {
+				body.rows.forEach(function(doc) {
+					//console.log(doc);
+					values.push ([doc.key, doc.value]);
+				});
+				countStatus.values = JSON.stringify(values);
+			} else {
+				countStatus.error = err;
+			}
+			res.render('status', countStatus);
+		});
 	});
 });
 
-
-
-app.get('/status0', function(req, res){
-	values = new Array();
-	db.view("design1", "timestampView", {"group": true, "reduce": true}, function(err, body) {
-		if (!err) {
-			body.rows.forEach(function(doc) {
-				//console.log(doc);
-				values.push ([doc.key, doc.value]);
-			});
-			//console.log(values);
-			res.render('status0', {'values': JSON.stringify(values)});
-		} else {
-			res.render('status0', {'error': err});
-		}
-	});
-	//console.log(count);
-});
 
 
 
