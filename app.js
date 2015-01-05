@@ -419,6 +419,7 @@ app.get('/status', function(req, res){
 
 
 
+
 // Handle the form POST containing the text to identify with Watson and reply with the language
 app.post('/re', function(req, res){
   try {
@@ -478,6 +479,27 @@ app.post('/re', function(req, res){
     console.log("Error: " + e);
     //res.render('error', {'error': e.message});
   }
+});
+
+
+app.get("/json/hashtags.json", function (req,res) {
+	var values = {'name': "hashtags", 'children': []};
+	db.view("design1", "hashTagView", {"group": true, "reduce": true}, function(err, data) {
+		if (!err) {
+			data.rows.sort(function(a, b) {
+				return b.value - a.value;
+			});
+			data.rows.forEach(function(doc) {
+				//console.log(doc);
+				values.children.push ( {'name': doc.key, 'size': doc.value} );
+				//console.log({'key': doc.key, 'value': doc.value});
+				console.log(values.children);
+			});
+		} else {
+			res.json(err);
+		}
+		res.json(values);
+	});
 });
 
 console.log("Connected to port =" + port + " host =  " + host);
