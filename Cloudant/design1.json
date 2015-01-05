@@ -1,5 +1,5 @@
 {
-  "_id": "_design/design1",
+  "_id": "_design/design1",  
   "views": {
     "countView": {
       "reduce": "_sum",
@@ -19,6 +19,10 @@
     },
     "lastTimeView": {
       "map": "function(doc){\r\n    if(doc.timestamp_ms){\r\n        emit(doc.timestamp_ms, null);\r\n    }\r\n}"
+    },
+    "hashTagView": {
+      "map": "function(doc) \n{ \n    doc.text.match('\\\\B#\\\\w*[a-zA-Z]+\\\\w*').map(function(i) { \n        emit(i, 1); \n    }); \n} ",
+      "reduce": "_sum"
     }
   },
   "language": "javascript"

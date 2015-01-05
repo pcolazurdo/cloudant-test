@@ -336,6 +336,11 @@ app.get('/', function(req, res){
     res.render('index');
 });
 
+app.get('/status0', function(req, res){
+	console.log("GET /");
+	res.render('status0');
+});
+
 
 // Handle the form POST containing the text to identify with Watson and reply with the language
 app.post('/', function(req, res){
