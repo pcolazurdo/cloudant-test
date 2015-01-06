@@ -20,25 +20,26 @@ d3.json("/json/hashtags.json", function(error, root) {
   console.log(root);
   console.log(classes(root));
   var node = svg.selectAll(".node")
-  .data(bubble.nodes(classes(root))
-  .filter(function(d) { return !d.children; }))
-  .enter().append("g")
-  .attr("class", "node")
-  .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+    .data(bubble.nodes(classes(root))
+    .filter(function(d) { return !d.children; }))
+    .enter().append("g")
+    .attr("class", "node")
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
-node.append("title")
-.text(function(d) { return d.className + ": " + format(d.value); });
+    node.append("title")
+      .text(function(d) { return d.className + ": " + format(d.value); });
 
-node.append("circle")
-.attr("r", function(d) { return d.r; })
-.style("fill", function(d) { return color(d.packageName); });
+    node.append("circle")
+      .attr("r", function(d) { return d.r; })
+      .style("fill", function(d) { return color(d.r % 10); });
 
-node.append("text")
-.attr("dy", ".3em")
-.style("text-anchor", "middle")
-.text(function(d) { return d.className.substring(0, d.r / 3); });
-
+    node.append("text")
+      .attr("dy", ".3em")
+      .style("text-anchor", "middle")
+      .text(function(d) { return d.className.substring(0, d.r / 3); });
 });
+
+$("svg").css("font", "10px sans-serif");
 
 // Returns a flattened hierarchy containing all leaf nodes under the root.
 function classes(root) {
