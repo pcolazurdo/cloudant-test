@@ -484,6 +484,27 @@ app.post('/re', function(req, res){
 
 app.get("/json/hashtags.json", function (req,res) {
 	var values = {'name': "hashtags", 'children': []};
+	console.log(db);
+	db.viewWithList("design1", "hashTagView", "sortList", {"group": true, "reduce": true}, function(err, data) {
+		console.log("Err: ", err);
+		console.log("Data: ", data);
+		if (!err) {
+			data.rows.forEach(function(doc) {
+				//console.log(doc);
+				values.children.push ( {'name': doc.key, 'size': doc.value} );
+				//console.log({'key': doc.key, 'value': doc.value});
+				console.log(values.children);
+			});
+		} else {
+			res.json(err);
+		}
+		res.json(values);
+	});
+});
+
+/*
+app.get("/json/hashtags.json", function (req,res) {
+	var values = {'name': "hashtags", 'children': []};
 	db.view("design1", "hashTagView", {"group": true, "reduce": true}, function(err, data) {
 		if (!err) {
 			data.rows.sort(function(a, b) {
@@ -501,6 +522,6 @@ app.get("/json/hashtags.json", function (req,res) {
 		res.json(values);
 	});
 });
-
+*/
 console.log("Connected to port =" + port + " host =  " + host);
 app.listen(port, host);

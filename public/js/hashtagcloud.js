@@ -17,6 +17,8 @@ var svg = d3.select(".placeholder").append("svg")
 
 
 d3.json("/json/hashtags.json", function(error, root) {
+  console.log(root);
+  console.log(classes(root));
   var node = svg.selectAll(".node")
   .data(bubble.nodes(classes(root))
   .filter(function(d) { return !d.children; }))
