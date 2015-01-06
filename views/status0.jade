@@ -4,7 +4,9 @@ head
   block title
     title Status Check
   block head
+    <style> #map-canvas { margin: 0; padding: 0; height: 100%; } </style>
     <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
 
 
 
@@ -23,6 +25,42 @@ body
           div.placeholder#placeholder(style="width:960px;height:960px;margin:0px auto")
           <script src="js/hashtagcloud.js"></script>
 
+      div.row
+        div.col-lg-12
+          h2 Mapping
+          script.
+            var map;
+
+            function initialize() {
+              map = new google.maps.Map(document.getElementById('map-canvas'), {
+                zoom: 2,
+                center: new google.maps.LatLng(2.8,-187.3),
+                mapTypeId: google.maps.MapTypeId.TERRAIN
+              });
+
+            var url = '/json/geo.json';
+            var j = [];
+            $.ajax({
+              type: 'GET',
+              url: url,
+              dataType: 'json',
+              success: function(data) { j = data;},
+              async: false
+            });
+
+            map.data.setStyle({
+              icon: '/images/blue.png',
+              fillColor: 'green'
+            });
+
+
+              map.data.loadGeoJson('/json/geo.json');
+            }
+
+
+            google.maps.event.addDomListener(window, 'load', initialize)
+
+          <div id="map-canvas" style="width:960px;height:960px;margin:0px auto"></div>
 
       div.row
         div.col-lg-12

@@ -1,5 +1,8 @@
 {
-  "_id": "_design/design1",  
+  "_id": "_design/design1",
+  "lists": {
+    "sortList": "function(head, req) { var row; var rows=[]; while(row = getRow()) { rows.push(row) } rows.sort(function(a,b) { return b.value-a.value }); send(JSON.stringify({\"rows\" : rows.slice(0,49)})); }"
+  },
   "views": {
     "countView": {
       "reduce": "_sum",
@@ -22,6 +25,10 @@
     },
     "hashTagView": {
       "map": "function(doc) \n{ \n    doc.text.match('\\\\B#\\\\w*[a-zA-Z]+\\\\w*').map(function(i) { \n        emit(i, 1); \n    }); \n} ",
+      "reduce": "_sum"
+    },
+    "geoView": {
+      "map": "function(doc) {\n  if (doc.coordinates || doc.place) \n    emit({\"coordinates\": doc.coordinates, \"place\": doc.place}, 1);\n}",
       "reduce": "_sum"
     }
   },

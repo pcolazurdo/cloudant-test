@@ -484,16 +484,13 @@ app.post('/re', function(req, res){
 
 app.get("/json/hashtags.json", function (req,res) {
 	var values = {'name': "hashtags", 'children': []};
-	console.log(db);
 	db.viewWithList("design1", "hashTagView", "sortList", {"group": true, "reduce": true}, function(err, data) {
-		console.log("Err: ", err);
-		console.log("Data: ", data);
+
 		if (!err) {
 			data.rows.forEach(function(doc) {
 				//console.log(doc);
 				values.children.push ( {'name': doc.key, 'size': doc.value} );
 				//console.log({'key': doc.key, 'value': doc.value});
-				console.log(values.children);
 			});
 		} else {
 			res.json(err);
@@ -502,19 +499,27 @@ app.get("/json/hashtags.json", function (req,res) {
 	});
 });
 
-/*
-app.get("/json/hashtags.json", function (req,res) {
-	var values = {'name': "hashtags", 'children': []};
-	db.view("design1", "hashTagView", {"group": true, "reduce": true}, function(err, data) {
+
+app.get("/json/geo.json", function (req,res) {
+	var values = {'type': "FeatureCollection", 'features': []};
+	db.view("design1", "geoView", {"group": true, "reduce": true}, function(err, data) {
 		if (!err) {
-			data.rows.sort(function(a, b) {
-				return b.value - a.value;
-			});
 			data.rows.forEach(function(doc) {
-				//console.log(doc);
-				values.children.push ( {'name': doc.key, 'size': doc.value} );
-				//console.log({'key': doc.key, 'value': doc.value});
-				console.log(values.children);
+				if (doc.key.coordinates)
+						coord = doc.key.coordinates;
+				else
+						coord = doc.key.place.coordinates;
+
+				if (coord && coord.coordinates) {
+					coord.coordinates = coord.coordinates.map( function (num) {
+						console.log(num);
+						str = num.toString();
+						str = str.substring(0,str.length-2);
+						console.log(str);
+						return parseFloat(str);
+					});
+					values.features.push ( {'type': 'Feature', 'geometry':  coord , 'properties': {'size': doc.value}  } );
+				}
 			});
 		} else {
 			res.json(err);
@@ -522,6 +527,7 @@ app.get("/json/hashtags.json", function (req,res) {
 		res.json(values);
 	});
 });
-*/
+
+
 console.log("Connected to port =" + port + " host =  " + host);
 app.listen(port, host);
