@@ -505,20 +505,24 @@ app.get("/json/geo.json", function (req,res) {
 	db.view("design1", "geoView", {"group": true, "reduce": true}, function(err, data) {
 		if (!err) {
 			data.rows.forEach(function(doc) {
-				if (doc.key.coordinates)
-						coord = doc.key.coordinates;
-				else
-						coord = doc.key.place.coordinates;
+				// Avoid returning places with just 1 hit
+				if (doc.value && doc.value > 1) {
+					if (doc.key.coordinates)
+							coord = doc.key.coordinates;
+					else
+							coord = doc.key.place.coordinates;
 
-				if (coord && coord.coordinates) {
-					coord.coordinates = coord.coordinates.map( function (num) {
-						console.log(num);
-						str = num.toString();
-						str = str.substring(0,str.length-2);
-						console.log(str);
-						return parseFloat(str);
-					});
-					values.features.push ( {'type': 'Feature', 'geometry':  coord , 'properties': {'size': doc.value}  } );
+					if (coord && coord.coordinates) {
+						coord.coordinates = coord.coordinates.map( function (num) {
+							console.log(num);
+							str = num.toString();
+							str = str.substring(0,str.length-2);
+							console.log(str);
+							return parseFloat(str);
+						});
+
+						values.features.push ( {'type': 'Feature', 'geometry':  coord , 'properties': {'size': doc.value}  } );
+					}
 				}
 			});
 		} else {

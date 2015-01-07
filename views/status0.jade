@@ -38,9 +38,15 @@ body
                 mapTypeId: google.maps.MapTypeId.TERRAIN
               });
 
-            map.data.setStyle({
-              icon: '/images/blue.png',
-              fillColor: 'green'
+            map.data.setStyle(function(feature) {
+              var ascii = feature.getProperty('size');
+              var color = ascii > 2 ? 'red' : 'blue'; console.log(color);
+              return {
+                icon: {
+                  path: google.maps.SymbolPath.CIRCLE, strokeColor: color, fillColor: color, fillOpacity: 1,
+                  scale: 5
+                }
+              };
             });
 
             map.data.loadGeoJson('/json/geo.json');
