@@ -16,10 +16,10 @@ module.exports = function(grunt) {
 					try {
 						var doc = JSON.parse(JSON.stringify(yaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'))));
 						//console.log(doc);
+						return 'cf start ' + doc.applications[0].name;
 					} catch (e) {
 						console.log(e);
 					}
-					return 'cf start ' + doc.applications[0].name;
 				}
 			},
 			cfstatus: {
@@ -27,11 +27,11 @@ module.exports = function(grunt) {
 					try {
 						var doc = JSON.parse(JSON.stringify(yaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'))));
 						//console.log(doc);
+						return 'cf app ' + doc.applications[0].name;
 					} catch (e) {
 						console.log(e);
 					}
 					//console.log ('cf app ' + doc.applications[0].name);
-					return 'cf app ' + doc.applications[0].name;
 				}
 			},
 			gitstatus: {

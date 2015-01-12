@@ -21,7 +21,7 @@ var env = process.env.NODE_ENV || 'DEV';
 // Setup logging
 log4js.loadAppender('file');
 log4js.addAppender(log4js.appenders.file('output.log',null,1000000000));
-log4js.replaceConsole() // the important part
+log4js.replaceConsole(); // the important part
 var logger = log4js.getLogger();
 // End Setup logging
 
@@ -30,7 +30,7 @@ var logger = log4js.getLogger();
 if (env != 'PROD') {
 	process.on('uncaughtException', function(err) {
     setTimeout(function() {
-    	console.log("Catched Fire on an Unhandled Error!")
+    	console.log("Catched Fire on an Unhandled Error!");
     	console.log(err);
 			}, 3000);
   });
@@ -89,7 +89,7 @@ if (process.env.VCAP_SERVICES) {
   		}
   		catch (e){
     		setTimeout(function() {
-        	console.log("Catched Fire on getting services")
+        	console.log("Catched Fire on getting services");
         	console.log(e);
     		}, 3000);
   }
@@ -107,7 +107,7 @@ if (process.env.VCAP_SERVICES) {
   }
   catch (e){
     setTimeout(function() {
-        console.log("Catched Fire on getting services")
+        console.log("Catched Fire on getting services");
         console.log(e);
     }, 3000);
   }
@@ -189,7 +189,7 @@ function countView(callback) {
 				}
 				callback(status);
 			}
-		)};
+		);}
 	});
 }
 
@@ -302,11 +302,10 @@ app.get( '/api/lid/:text', function( request, response) {
         return response.send({ 'txt': request.params.text, 'lang': lang });
       }
       catch (e) {
-        console.log("Catched Fire on result.on (end)")
+        console.log("Catched Fire on result.on (end)");
         console.log(e);
       }
-    })
-
+    });
   });
 
   // create the request to Watson
@@ -315,7 +314,7 @@ app.get( '/api/lid/:text', function( request, response) {
     watson_req.end();
   }
   catch (e) {
-    console.log("Catched Fire on watson_req.write")
+    console.log("Catched Fire on watson_req.write");
     console.log(e);
   }
 });
@@ -378,12 +377,12 @@ app.post('/', function(req, res){
     result.on('end', function() {
       var lang = JSON.parse(responseString).lang;
       return res.render('index',{ 'txt': req.body.txt, 'lang': lang });
-    })
+    });
 
   });
 
   watson_req.on('error', function(e) {
-    return res.render('index', {'error':e.message})
+    return res.render('index', {'error':e.message});
   });
 
   // create the request to Watson
@@ -456,12 +455,12 @@ app.post('/re', function(req, res){
 
       result.on('end', function() {
         try{
-          return res.render('re_index',{'xml':xmlescape(resp_string), 'text':req.body.txt})
+          return res.render('re_index',{'xml':xmlescape(resp_string), 'text':req.body.txt});
         } catch (e){
           console.log("Error: " + e);
           //res.render('error', {'error': e.message});
         }
-      })
+      });
     });
   } catch (e){
     console.log("Error: " + e);
@@ -469,7 +468,7 @@ app.post('/re', function(req, res){
   }
 
   watson_req.on('error', function(e) {
-    return res.render('re_index', {'error':e.message})
+    return res.render('re_index', {'error':e.message});
   });
 
   // Wire the form data to the service
