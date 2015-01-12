@@ -5,42 +5,49 @@
  *
  */
 
-var express = require('express');
-var url = require('url');
-var querystring = require('querystring');
+var configApp = require('./config.json');
 var log4js = require('log4js');
-var util = require('util');
-var twitter = require('twitter');
-var http = require('http');
-var https = require('https');
-var xmlescape = require('xml-escape');
-
-//detect environment we're running - default is 'DEV'
-var env = process.env.NODE_ENV || 'DEV';
 
 // Setup logging
 log4js.loadAppender('file');
-log4js.addAppender(log4js.appenders.file('output.log',null,1000000000));
+log4js.addAppender(log4js.appenders.file('output.log',null,1000000000,3,true));
 log4js.replaceConsole(); // the important part
 var logger = log4js.getLogger();
+logger.setLevel(configApp.loggerLevel || "DEBUG");
 // End Setup logging
 
 //Capture all Unhandled Errors - seems not recommended in production so we use
 // it only if we aren't in PROD
 if (env != 'PROD') {
 	process.on('uncaughtException', function(err) {
-    setTimeout(function() {
-    	console.log("Catched Fire on an Unhandled Error!");
-    	console.log(err);
-			}, 3000);
-  });
+		setTimeout(function() {
+			logger.error("Catched Fire on an Unhandled Error!");
+			logger.error(err);
+		}, 3000);
+	});
 }
 
+var express = require('express');
+var url = require('url');
+var querystring = require('querystring');
+var util = require('util');
+var twitter = require('twitter');
+var http = require('http');
+var https = require('https');
+var xmlescape = require('xml-escape');
+
+
+//detect environment we're running - default is 'DEV'
+var env = process.env.NODE_ENV || 'DEV';
+
+logger.info("App Started: " + Date().toString());
+
+// Read config information
+
+logger.info("Config information: ", configApp);
 
 
 
-
-console.log("App Started: " + Date().toString());
 
 // setup middleware
 var app = express();
@@ -51,6 +58,7 @@ app.use(app.router);
 app.use(express.static(__dirname + '/public')); //setup static public directory
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/views'); //optional since express defaults to CWD/views
+
 
 // There are many useful environment variables available in process.env.
 // VCAP_APPLICATION contains useful information about a deployed application.
@@ -73,7 +81,7 @@ if (process.env.VCAP_SERVICES) {
 	  var services = JSON.parse(process.env.VCAP_SERVICES);
 	  var host = process.env.VCAP_APP_HOST || '127.0.0.1';
 	  var port = process.env.VCAP_APP_PORT || 3000;
-	  console.log('VCAP_SERVICES: %s', process.env.VCAP_SERVICES);
+	  logger.info('VCAP_SERVICES: %s', process.env.VCAP_SERVICES);
 	  // Also parse out Cloudant settings.
 	  var cloudant = services['cloudantNoSQLDB'][0]['credentials'];
 		  try {
@@ -84,13 +92,13 @@ if (process.env.VCAP_SERVICES) {
       		service_username = svc.username;
       		service_password = svc.password;
     		} else {
-      		console.log('The service '+service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
+      		logger.info('The service '+service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
     		}
   		}
   		catch (e){
     		setTimeout(function() {
-        	console.log("Catched Fire on getting services");
-        	console.log(e);
+        	logger.error("Catched Fire on getting services");
+        	logger.error(e);
     		}, 3000);
   }
 
@@ -102,13 +110,13 @@ if (process.env.VCAP_SERVICES) {
       re_service_username = re_svc.username;
       re_service_password = re_svc.password;
     } else {
-      console.log('The service '+re_service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
+      logger.info('The service '+re_service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
     }
   }
   catch (e){
     setTimeout(function() {
-        console.log("Catched Fire on getting services");
-        console.log(e);
+        logger.error("Catched Fire on getting services");
+        logger.error(e);
     }, 3000);
   }
 
@@ -120,20 +128,20 @@ var port = process.env.VCAP_APP_PORT || 3000;
 // Retrieve cloudant information from Linux Environment
 if (process.env.COUCH_HOST) {
           var cloudant = process.env['COUCH_HOST'];
-					console.log (cloudant);
+					logger.info (cloudant);
 }
 
 var auth = 'Basic ' + new Buffer(service_username + ':' + service_password).toString('base64');
 var re_auth = 'Basic ' + new Buffer(re_service_username + ':' + re_service_password).toString('base64');
 
 
-console.log('service_url = ' + service_url);
-console.log('service_username = ' + service_username);
-console.log('service_password = ' + new Array(service_password.length).join("X"));
-console.log('re_service_url = ' + re_service_url);
-console.log('re_service_username = ' + re_service_username);
-console.log('re_service_password = ' + new Array(re_service_password.length).join("X"));
-console.log('cloudant = ' + cloudant);
+logger.info('service_url = ' + service_url);
+logger.info('service_username = ' + service_username);
+logger.info('service_password = ' + new Array(service_password.length).join("X"));
+logger.info('re_service_url = ' + re_service_url);
+logger.info('re_service_username = ' + re_service_username);
+logger.info('re_service_password = ' + new Array(re_service_password.length).join("X"));
+logger.info('cloudant = ' + cloudant);
 
 // Setup Cloudant connection
 if (cloudant) {
@@ -142,9 +150,9 @@ if (cloudant) {
 	//try creating the database. If it already exists it will log a message.
 	nano.db.create(db_name, function (error, body, headers) {
     if(error) {
-			console.log ("Error while creating the database " + db_name);
-			console.log (error.message);
-			console.log (error['status-code']);
+			logger.debug ("Error while creating the database " + db_name);
+			logger.debug (error.message);
+			logger.debug (error['status-code']);
 		}
 	});
 	var db = nano.use(db_name);
@@ -155,9 +163,9 @@ if (cloudant) {
 function insert_doc(doc) {
 	if (cloudant) {
 	  db.insert(doc, function (error,http_body,http_headers) {
-	      if(error) return console.log(error);
+	      if(error) return logger.error(error);
 	    });
-      // console.log(http_body);
+      // logger.debug(http_body);
 		}
 }
 
@@ -168,21 +176,21 @@ function countView(callback) {
 	var status;
 	db.view("design1", "countView", {"group": true, "reduce": true}, function(err, body) {
 		if (err) {
-			console.log(err);
+			logger.error(err);
 			status = {'error': err};
 		} else {
-			//console.log(body);
+			//logger.debug(body);
 			body.rows.forEach(function(doc) {
 				count = doc.value;
 			});
 			db.view("design1", "lastTimeView", {"limit": 1, "descending": true}, function(err, body) {
 				if (err) {
-					console.log(err);
+					logger.error(err);
 					status = {'error': err};
 				} else {
-					//console.log(body);
+					//logger.debug(body);
 					body.rows.forEach(function(doc) {
-						//console.log("doc", doc);
+						logger.debug("doc", doc);
 						var date = new Date(parseInt(doc.key));
 						status = {'count': count, 'lasttimestamp': date};
 					});
@@ -198,23 +206,21 @@ function countView(callback) {
 var configTwitter = require('./twitter-cred.json');
 var twit = new twitter(configTwitter);
 
-twit.stream('user', {track:'pcolazurdo'}, function(stream) {
+twit.stream('user', {track: configApp.track}, function(stream) {
     stream.on('data', function(data) {
-        //console.log(typeof data.target_object);
-				//console.log(typeof data.id_str);
-				//console.log(util.inspect(data));
+        //logger.debug(typeof data.target_object);
+				//logger.debug(typeof data.id_str);
+				logger.debug(util.inspect(data));
 				// Only insert tweets
 				if (typeof data.id_str !== 'undefined') insert_doc(data);
     });
 		stream.on('error', function(data) {
-				//console.log(typeof data.target_object);
-				//console.log(typeof data.id_str);
-				console.log(util.inspect(data));
+				logger.error("Stream Error: ", util.inspect(data));
 		});
     //stream.on('favorite', function(data) {
-    //    console.log(data.target_object.text);
+    //    logger.debug(data.target_object.text);
     //    insert_doc(data, data.target_object.id_str, function (err, response) {
-    //        console.log(err || response);
+    //        logger.debug(err || response);
     //      });
     //});
     // Disconnect stream after five seconds
@@ -234,13 +240,13 @@ app.get( '/api', function( request, response ) {
                 Status: "Ok"
             }
         ];
-    console.log("GET /api");
+    logger.debug("GET /api");
 
     response.send(resp);
 });
 
 app.get( '/api/log/:text', function( request, response ) {
-    console.log("GET /api/log/*");
+    logger.debug("GET /api/log/*");
     var resp = [
             {
                 Application: "watson-pcolazurdo",
@@ -254,7 +260,7 @@ app.get( '/api/log/:text', function( request, response ) {
 });
 
 app.post( '/api/log/:text', function( request, response ) {
-    console.log("POST /api/log/*");
+    logger.debug("POST /api/log/*");
     var resp = [
             {
                 Application: "watson-pcolazurdo",
@@ -302,8 +308,8 @@ app.get( '/api/lid/:text', function( request, response) {
         return response.send({ 'txt': request.params.text, 'lang': lang });
       }
       catch (e) {
-        console.log("Catched Fire on result.on (end)");
-        console.log(e);
+        logger.error("Catched Fire on result.on (end)");
+        logger.error(e);
       }
     });
   });
@@ -314,8 +320,8 @@ app.get( '/api/lid/:text', function( request, response) {
     watson_req.end();
   }
   catch (e) {
-    console.log("Catched Fire on watson_req.write");
-    console.log(e);
+    logger.error("Catched Fire on watson_req.write");
+    logger.error(e);
   }
 });
 
@@ -333,19 +339,19 @@ app.get( '/api/re/:text', function( request, response) {
 
 // render index page
 app.get('/', function(req, res){
-    console.log("GET /");
+    logger.debug("GET /");
     res.render('index');
 });
 
 app.get('/status0', function(req, res){
-	console.log("GET /");
+	logger.debug("GET /");
 	res.render('status0');
 });
 
 
 // Handle the form POST containing the text to identify with Watson and reply with the language
 app.post('/', function(req, res){
-  console.log("POST /");
+  logger.debug("POST /");
   var request_data = {
     'txt': req.body.txt,
     'sid': 'lid-generic',  // service type : language identification (lid)
@@ -405,7 +411,7 @@ app.get('/status', function(req, res){
 		db.view("design1", "timestampView", {"group": true, "reduce": true}, function(err, body) {
 			if (!err) {
 				body.rows.forEach(function(doc) {
-					//console.log(doc);
+					logger.debug("/status: timeStampView", doc);
 					values.push ([doc.key, doc.value]);
 				});
 				countStatus.values = JSON.stringify(values);
@@ -439,7 +445,7 @@ app.post('/re', function(req, res){
     };
   }
   catch (e){
-    console.log("Error: " + e);
+    logger.error("Error: " + e);
     //res.render('error', {'error': e.message});
   }
 
@@ -457,13 +463,13 @@ app.post('/re', function(req, res){
         try{
           return res.render('re_index',{'xml':xmlescape(resp_string), 'text':req.body.txt});
         } catch (e){
-          console.log("Error: " + e);
+          logger.error("Error: " + e);
           //res.render('error', {'error': e.message});
         }
       });
     });
   } catch (e){
-    console.log("Error: " + e);
+    logger.error("Error: " + e);
     //res.render('error', {'error': e.message});
   }
 
@@ -472,12 +478,12 @@ app.post('/re', function(req, res){
   });
 
   // Wire the form data to the service
-  console.log("Query String on RE:" + querystring.stringify(req.body));
+  logger.error("Query String on RE:" + querystring.stringify(req.body));
   try {
     watson_req.write(querystring.stringify(req.body));
     watson_req.end();
   } catch (e){
-    console.log("Error: " + e);
+    logger.error("Error: " + e);
     //res.render('error', {'error': e.message});
   }
 });
@@ -489,9 +495,9 @@ app.get("/json/hashtags.json", function (req,res) {
 
 		if (!err) {
 			data.rows.forEach(function(doc) {
-				//console.log(doc);
+				//logger.debug(doc);
 				values.children.push ( {'name': doc.key, 'size': doc.value} );
-				//console.log({'key': doc.key, 'value': doc.value});
+				//logger.debug({'key': doc.key, 'value': doc.value});
 			});
 		} else {
 			res.json(err);
@@ -516,10 +522,10 @@ app.get("/json/geo.json", function (req,res) {
 
 					if (coord && coord.coordinates) {
 						coord.coordinates = coord.coordinates.map( function (num) {
-							console.log(num);
+							logger.debug(num);
 							str = num.toString();
 							//str = str.substring(0,str.length-2);
-							console.log(str);
+							logger.debug(str);
 							return parseFloat(str);
 						});
 						values.features.push ( {'type': 'Feature', 'geometry':  coord , 'properties': {'size': doc.value}  } );
@@ -537,19 +543,19 @@ app.get("/json/geo.json", function (req,res) {
 
 // Status Watcher to check if Twitter stream is working - if not it shutdown the app waiting for bluemix infra to restart it.
 setInterval(function() {
-	console.log("Checking twitter connection Status");
+	logger.info("Checking twitter connection Status");
 	var lastUpdated;
 	db.view("design1", "lastTimeView", {"limit": 1, "descending": true}, function(err, body) {
 		if (err) {
-			console.log(err);
+			logger.error(err);
 		} else {
-			//console.log(body);
+			//logger.debug(body);
 			body.rows.forEach(function(doc) {
 				lastUpdated = new Date(parseInt(doc.key));
 			});
-			console.log(Date.now() - lastUpdated);
+			logger.debug("Time Diff between lastUpdated and now", Date.now() - lastUpdated);
 			if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
-				console.log("No new twitter updates since", lastUpdated, "so quitting ...");
+				logger.error("No new twitter updates since", lastUpdated, "so quitting ...");
 				process.exit(1);
 			}
 		}
@@ -559,5 +565,5 @@ setInterval(function() {
 
 
 
-console.log("Connected to port =" + port + " host =  " + host);
+logger.info("Connected to port =" + port + " host =  " + host);
 app.listen(port, host);
