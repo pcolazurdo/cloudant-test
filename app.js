@@ -15,7 +15,6 @@ var http = require('http');
 var https = require('https');
 var xmlescape = require('xml-escape');
 
-
 //detect environment we're running - default is 'DEV'
 var env = process.env.NODE_ENV || 'DEV';
 
@@ -36,6 +35,9 @@ if (env != 'PROD') {
 			}, 3000);
   });
 }
+
+
+
 
 
 console.log("App Started: " + Date().toString());
@@ -531,6 +533,31 @@ app.get("/json/geo.json", function (req,res) {
 		res.json(values);
 	});
 });
+
+
+
+// Status Watcher to check if Twitter stream is working - if not it shutdown the app waiting for bluemix infra to restart it.
+setInterval(function() {
+	console.log("Checking twitter connection Status");
+	var lastUpdated;
+	db.view("design1", "lastTimeView", {"limit": 1, "descending": true}, function(err, body) {
+		if (err) {
+			console.log(err);
+		} else {
+			//console.log(body);
+			body.rows.forEach(function(doc) {
+				lastUpdated = new Date(parseInt(doc.key));
+			});
+			console.log(Date.now() - lastUpdated);
+			if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
+				console.log("No new twitter updates since", lastUpdated, "so quitting ...");
+				process.exit(1);
+			}
+		}
+	});
+}, 300000);
+
+
 
 
 console.log("Connected to port =" + port + " host =  " + host);
