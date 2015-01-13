@@ -37,6 +37,11 @@ var https = require('https');
 var xmlescape = require('xml-escape');
 
 
+// React
+var JSX = require('node-jsx').install();
+var React = require('react');
+var TweetsApp = require('./components/TweetsApp.react');
+
 //detect environment we're running - default is 'DEV'
 var env = process.env.NODE_ENV || 'DEV';
 
@@ -309,6 +314,31 @@ app.get("/json/geo.json", function (req,res) {
 			res.json(err);
 		}
 		res.json(values);
+	});
+});
+
+app.get("/main", function (req,res) {
+  var tweets = new Array();
+	tweets.push( {
+		twid       : "String",
+		active     : "Boolean",
+		author     : "String",
+		avatar     : "String",
+		body       : "String",
+		date       : "Date",
+		screenname : "String"
+	});
+
+	var markup = React.renderComponentToString(
+		TweetsApp({
+			tweets: tweets
+		})
+	);
+
+	// Render our 'home' template
+	res.render('main', {
+		markup: markup, // Pass rendered react markup
+		state: JSON.stringify(tweets) // Pass current state to client side
 	});
 });
 
