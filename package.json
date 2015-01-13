@@ -18,7 +18,8 @@
     "twitter": "^1.0.1",
     "xml-escape": "^1.0.0",
     "node-jsx": "~0.11.0",
-    "react": "~0.11.2"    
+    "react": "~0.11.2",
+    "xmlhttprequest": "https://github.com/LearnBoost/node-XMLHttpRequest/archive/0f36d0b5ebc03d85f860d42a64ae9791e1daa433.tar.gz"
   },
   "repository": "https://github.com/pcolazurdo/cloudant-test.git",
   "keywords": [

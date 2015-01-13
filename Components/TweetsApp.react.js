@@ -4,6 +4,7 @@ var React = require('react');
 var Tweets = require('./Tweets.react.js');
 var Loader = require('./Loader.react.js');
 var NotificationBar = require('./NotificationBar.react.js');
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 // Export the TweetsApp component
 module.exports = TweetsApp = React.createClass({
@@ -33,7 +34,8 @@ module.exports = TweetsApp = React.createClass({
 
     // Setup our ajax request
     var request = new XMLHttpRequest(), self = this;
-    request.open('GET', 'page/' + page + "/" + this.state.skip, true);
+    //request.open('GET', 'json/' + page + "/" + this.state.skip, true);
+    request.open('GET', '/json/tweets.json', true);
     request.onload = function() {
 
       // If everything is cool...
@@ -170,7 +172,7 @@ module.exports = TweetsApp = React.createClass({
 
   // Render the component
   render: function(){
-
+    this.getPage(this.state.page);
     return (
       <div className="tweets-app">
         <Tweets tweets={this.state.tweets} />

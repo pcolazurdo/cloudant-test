@@ -317,16 +317,35 @@ app.get("/json/geo.json", function (req,res) {
 	});
 });
 
+app.get("/json/tweets.json", function (req,res) {
+	var tweets = new Array();
+	db.view("design1", "timestampView", {"include_docs": true, "limit": 50, "reduce": false, "group": false, "descending": true}, function(err, data) {
+		if (!err) {
+			data.rows.forEach(function(doc) {
+				logger.debug("Doc: ", doc);
+				if (doc.doc.text) {
+					tweets.push( {
+						avatar     : doc.doc.user.profile_image_url,
+						text       : doc.doc.text,
+						date       : new Date(doc.doc.timestamp_ms),
+						screenname : doc.doc.user.screen_name
+					});
+				}
+			});
+		} else {
+			res.json(err);
+		}
+		res.json(tweets);
+	});
+});
+
 app.get("/main", function (req,res) {
   var tweets = new Array();
 	tweets.push( {
-		twid       : "String",
-		active     : "Boolean",
-		author     : "String",
-		avatar     : "String",
-		body       : "String",
-		date       : "Date",
-		screenname : "String"
+		avatar     : "doc.profile_image_url",
+		text       : "doc.text",
+		date       : "new Date(doc.timestamp_ms)",
+		screenname : "doc.user.screen_name"
 	});
 
 	var markup = React.renderComponentToString(
