@@ -10,10 +10,10 @@ module.exports = Tweet = React.createClass({
         <img src={tweet.avatar} className="avatar"/>
         <blockquote>
           <cite>
-            <a href={"http://www.twitter.com/" + tweet.screenname}>{tweet.author}</a> 
-            <span className="screen-name">@{tweet.screenname}</span> 
+            <a href={"http://www.twitter.com/" + tweet.screenname}>{tweet.screenname}</a>
+            <span className="screen-name">@{tweet.screenname}</span>
           </cite>
-          <span className="content">{tweet.body}</span>
+          <span className="content">{tweet.text}</span>
         </blockquote>
       </li>
     )

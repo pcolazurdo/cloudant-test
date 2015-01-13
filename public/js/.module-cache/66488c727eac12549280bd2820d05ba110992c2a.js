@@ -7,7 +7,7 @@ var NotificationBar = require('./NotificationBar.react.js');
 //var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 // Export the TweetsApp component
-module.exports = TweetsApp = React.createClass({
+module.exports = TweetsApp = React.createClass({displayName: "TweetsApp",
 
   // Method to add a tweet to our timeline
   addTweet: function(tweet){
@@ -174,11 +174,11 @@ module.exports = TweetsApp = React.createClass({
   render: function(){
     //this.getPage(this.state.page);
     return (
-      <div className="tweets-app">
-        <Tweets tweets={this.state.tweets} />
-        <Loader paging={this.state.paging}/>
-        <NotificationBar count={this.state.count} onShowNewTweets={this.showNewTweets}/>
-      </div>
+      React.createElement("div", {className: "tweets-app"}, 
+        React.createElement(Tweets, {tweets: this.state.tweets}), 
+        React.createElement(Loader, {paging: this.state.paging}), 
+        React.createElement(NotificationBar, {count: this.state.count, onShowNewTweets: this.showNewTweets})
+      )
     )
 
   }

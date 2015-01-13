@@ -7,8 +7,9 @@
     "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1",
     "start": "node app.js",
     "watch": "watchify client.js -o public/js/bundle.js -v",
-    "browserify": "browserify client.js | uglifyjs > public/js/bundle.js",
-    "build": "npm run browserify "
+    "browserify": "browserify client.js > public/js/bundle.js",
+    "browserify2": "browserify client.js | uglifyjs > public/js/bundle.js",
+    "build": "npm run browserify"
   },
   "dependencies": {
     "nano": "^6.0.2",
