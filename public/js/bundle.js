@@ -53,14 +53,14 @@ module.exports = Tweet = React.createClass({displayName: 'Tweet',
   render: function(){
     var tweet = this.props.tweet;
     return (
-      React.DOM.li({className: "tweet" + (tweet.active ? ' active' : '')}, 
-        React.DOM.img({src: tweet.avatar, className: "avatar"}), 
+      React.DOM.span({className: "tweet" + (tweet.active ? ' active' : '')}, 
         React.DOM.blockquote(null, 
-          React.DOM.cite(null, 
-            React.DOM.a({href: "http://www.twitter.com/" + tweet.screenname}, tweet.author), 
-            React.DOM.span({className: "screen-name"}, "@", tweet.screenname)
-          ), 
-          React.DOM.span({className: "content"}, tweet.body)
+          React.DOM.img({src: tweet.avatar, className: "avatar"}), 
+          React.DOM.p(null, tweet.body), 
+          React.DOM.footer(null, 
+            React.DOM.a({href: "http://www.twitter.com/" + tweet.screenname}, tweet.screenname), 
+            React.DOM.cite(null, " at ", tweet.date, " ")
+          )
         )
       )
     )
@@ -87,7 +87,7 @@ module.exports = Tweets = React.createClass({displayName: 'Tweets',
 
     // Return ul filled with our mapped tweets
     return (
-      React.DOM.ul({className: "tweets"}, content)
+      React.DOM.span({className: "tweets"}, content)
     )
 
   }
@@ -252,15 +252,15 @@ module.exports = TweetsApp = React.createClass({displayName: 'TweetsApp',
     var self = this;
 
     // Initialize socket.io
-    var socket = io.connect();
+    //var socket = io.connect();
 
     // On tweet event emission...
-    socket.on('tweet', function (data) {
+    //socket.on('tweet', function (data) {
 
         // Add a tweet to our queue
-        self.addTweet(data);
+    //    self.addTweet(data);
 
-    });
+    //});
 
     // Attach scroll event to the window for infinity paging
     window.addEventListener('scroll', this.checkWindowScroll);

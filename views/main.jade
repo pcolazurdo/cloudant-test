@@ -5,15 +5,16 @@ block head
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <script src="http://fb.me/react-with-addons-0.12.2.js"></script>
-    <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
 
 block row-content
-  div.row
-    div.col-lg-6
-      h2 Trying React.js
-      div.well
-        <section id="react-app">!{markup}</div>
-        <script id="initial-state" type="application/json">!{state}</script>
+  div.container-fluid
+    div.row
+      div.col-xs-12
+        h2 Trying React.js
+        div.well
+          <section id="react-app">!{markup}</div>
+          <script id="initial-state" type="application/json">!{state}</script>
 
-<script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
-<script src="js/bundle.js"></script>
+block footer
+  <script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
+  <script src="js/bundle.js"></script>

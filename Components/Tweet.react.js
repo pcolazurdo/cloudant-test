@@ -6,16 +6,16 @@ module.exports = Tweet = React.createClass({
   render: function(){
     var tweet = this.props.tweet;
     return (
-      <li className={"tweet" + (tweet.active ? ' active' : '')}>
-        <img src={tweet.avatar} className="avatar"/>
+      <span className={"tweet" + (tweet.active ? ' active' : '')}>
         <blockquote>
-          <cite>
+          <img src={tweet.avatar} className="avatar"/>
+          <p>{tweet.body}</p>
+          <footer>
             <a href={"http://www.twitter.com/" + tweet.screenname}>{tweet.screenname}</a>
-            <span className="screen-name">@{tweet.screenname}</span>
-          </cite>
-          <span className="content">{tweet.text}</span>
+            <cite> at {tweet.date} </cite>
+          </footer>
         </blockquote>
-      </li>
+      </span>
     )
   }
 });

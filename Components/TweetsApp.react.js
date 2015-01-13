@@ -155,15 +155,15 @@ module.exports = TweetsApp = React.createClass({
     var self = this;
 
     // Initialize socket.io
-    var socket = io.connect();
+    //var socket = io.connect();
 
     // On tweet event emission...
-    socket.on('tweet', function (data) {
+    //socket.on('tweet', function (data) {
 
         // Add a tweet to our queue
-        self.addTweet(data);
+    //    self.addTweet(data);
 
-    });
+    //});
 
     // Attach scroll event to the window for infinity paging
     window.addEventListener('scroll', this.checkWindowScroll);

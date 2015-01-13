@@ -326,7 +326,7 @@ app.get("/json/tweets.json", function (req,res) {
 				if (doc.doc.text) {
 					tweets.push( {
 						avatar     : doc.doc.user.profile_image_url,
-						text       : doc.doc.text,
+						body       : doc.doc.text,
 						date       : new Date(doc.doc.timestamp_ms),
 						screenname : doc.doc.user.screen_name
 					});
@@ -356,7 +356,7 @@ app.get("/main", function (req,res) {
 				if (doc.doc.text) {
 					tweets.push( {
 						avatar     : doc.doc.user.profile_image_url,
-						text       : doc.doc.text,
+						body       : doc.doc.text,
 						date       : new Date(doc.doc.timestamp_ms),
 						screenname : doc.doc.user.screen_name
 					});
