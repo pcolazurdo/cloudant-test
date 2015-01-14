@@ -318,38 +318,33 @@ app.get("/json/geo.json", function (req,res) {
 });
 
 app.get("/json/tweets.json", function (req,res) {
-	var tweets = new Array();
-	db.view("design1", "timestampView", {"include_docs": true, "limit": 50, "reduce": false, "group": false, "descending": true}, function(err, data) {
-		if (!err) {
-			data.rows.forEach(function(doc) {
-				logger.debug("Doc: ", doc);
-				if (doc.doc.text) {
-					tweets.push( {
-						avatar     : doc.doc.user.profile_image_url,
-						body       : doc.doc.text,
-						date       : new Date(doc.doc.timestamp_ms),
-						screenname : doc.doc.user.screen_name
-					});
-				}
-			});
-		} else {
-			res.json(err);
-		}
-		res.json(tweets);
+	nextKey = {
+		key : req.query.startkey || null,
+		docid : req.query.docidkey || null
+	};
+	tweetView(nextKey, req.query.pagesize || 50, function (status) {
+		res.json(status.tweets);
 	});
 });
 
-app.get("/main", function (req,res) {
-  // var tweets = new Array();
-	// tweets.push( {
-	// 	avatar     : "doc.profile_image_url",
-	// 	text       : "doc.text",
-	// 	date       : "new Date(doc.timestamp_ms)",
-	// 	screenname : "doc.user.screen_name"
-	// });
 
-	var tweets = new Array();
-	db.view("design1", "timestampView", {"include_docs": true, "limit": 10, "reduce": false, "group": false, "descending": true}, function(err, data) {
+
+function tweetView(firstKey, pageSize, callback) {
+	var status = {};
+	var tweets = [];
+	options = {
+		"include_docs": true,
+		"limit": pageSize + 1 || 10 + 1,
+		"reduce": false,
+		"group": false,
+		"descending": true
+	};
+	if (firstKey && firstKey.key && firstKey.docid) {
+		options.startkey = firstkey.key;
+		options.startkey_docid = firstkey.docid;
+	}
+	logger.debug("tweetView options: ", options);
+	db.view("design1", "lastTimeView", options, function(err, data) {
 		if (!err) {
 			data.rows.forEach(function(doc) {
 				//logger.debug("Doc: ", doc);
@@ -362,24 +357,38 @@ app.get("/main", function (req,res) {
 					});
 				}
 			});
-			var markup = React.renderComponentToString(
-				TweetsApp({
-					tweets: tweets
-				})
-			);
-
-			logger.debug("markup: ", markup);
-
-			// Render our 'home' template
-			res.render('main', {
-				markup: markup, // Pass rendered react markup
-				state: JSON.stringify(tweets) // Pass current state to client side
-			});
+			status.tweets = tweets;
+		} else {
+			logger.error("error on tweetsView:", err);
 		}
+		callback(status);
 	});
+}
 
+app.get("/main", function (req,res) {
+  // var tweets = new Array();
+	// tweets.push( {
+	// 	avatar     : "doc.profile_image_url",
+	// 	text       : "doc.text",
+	// 	date       : "new Date(doc.timestamp_ms)",
+	// 	screenname : "doc.user.screen_name"
+	// });
 
+	tweetView(null, 10, function( status ) {
+		var markup = React.renderComponentToString(
+			TweetsApp({
+				tweets: status.tweets
+			})
+		);
 
+		//logger.debug("markup: ", markup);
+
+		// Render our 'home' template
+		res.render('main', {
+			markup: markup, // Pass rendered react markup
+			state: JSON.stringify(status.tweets) // Pass current state to client side
+		});
+	});
 });
 
 
