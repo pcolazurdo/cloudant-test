@@ -35,6 +35,7 @@ var twitter = require('twitter');
 var http = require('http');
 var https = require('https');
 var xmlescape = require('xml-escape');
+var paginate = require('./couchdb-paginate');
 
 
 // React
@@ -316,6 +317,21 @@ app.get("/json/geo.json", function (req,res) {
 		res.json(values);
 	});
 });
+
+
+app.get("/tweets/:page",  paginate({
+	database: db,
+	design: "design1",
+	view: "lastTimeView",
+	asJson: true,
+	options: {
+		"include_docs": true,
+		"limit": 50, //pageSize + 1 || 10 + 1,
+		"reduce": false,
+		"group": false,
+		"descending": true
+	}
+}));
 
 app.get("/json/tweets.json", function (req,res) {
 	nextKey = {

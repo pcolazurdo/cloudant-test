@@ -12,15 +12,15 @@
     "build": "npm run browserify"
   },
   "dependencies": {
-    "nano": "^6.0.2",
     "express": "3.4.7",
     "jade": "1.1.4",
     "log4js": "^0.6.21",
-    "twitter": "^1.0.1",
-    "xml-escape": "^1.0.0",
+    "nano": "^6.0.2",
     "node-jsx": "~0.11.0",
     "react": "~0.11.2",
-    "xmlhttprequest": "https://github.com/LearnBoost/node-XMLHttpRequest/archive/0f36d0b5ebc03d85f860d42a64ae9791e1daa433.tar.gz"
+    "twitter": "^1.0.1",
+    "when": "^1.5.1",
+    "xml-escape": "^1.0.0"
   },
   "repository": "https://github.com/pcolazurdo/cloudant-test.git",
   "keywords": [
