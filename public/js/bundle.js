@@ -54,14 +54,10 @@ module.exports = Tweet = React.createClass({displayName: 'Tweet',
     var tweet = this.props.tweet;
     return (
       React.DOM.span({className: "tweet" + (tweet.active ? ' active' : '')}, 
-        React.DOM.blockquote(null, 
-          React.DOM.img({src: tweet.avatar, className: "avatar"}), 
-          React.DOM.p(null, tweet.body), 
-          React.DOM.footer(null, 
-            React.DOM.a({href: "http://www.twitter.com/" + tweet.screenname}, tweet.screenname), 
-            React.DOM.cite(null, " at ", tweet.date, " ")
-          )
-        )
+        React.DOM.img({src: tweet.avatar, className: "avatar"}), 
+        React.DOM.a({href: "http://www.twitter.com/" + tweet.screenname}, tweet.screenname), 
+        React.DOM.cite(null, " at ", tweet.date, " "), 
+        React.DOM.p({className: "tweetBody"}, tweet.body)
       )
     )
   }

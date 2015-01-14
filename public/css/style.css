@@ -29,3 +29,89 @@ color: white;
 background-color: #FFE14F; /* IBM's YELLOW1 */
 color: white;
 }
+
+
+.avatar {
+  border-bottom-color: rgb(136, 153, 166);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border-bottom-style: none;
+  border-bottom-width: 0px;
+  border-image-outset: 0px;
+  border-image-repeat: stretch;
+  border-image-slice: 100%;
+  border-image-source: none;
+  border-image-width: 1;
+  border-left-color: rgb(136, 153, 166);
+  border-left-style: none;
+  border-left-width: 0px;
+  border-right-color: rgb(136, 153, 166);
+  border-right-style: none;
+  border-right-width: 0px;
+  border-top-color: rgb(136, 153, 166);
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-top-style: none;
+  border-top-width: 0px;
+  color: rgb(136, 153, 166);
+  cursor: auto;
+  display: block;
+  float: left;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  height: 48px;
+  line-height: 18px;
+  list-style-image: none;
+  list-style-position: outside;
+  list-style-type: none;
+  margin-left: -58px;
+  margin-top: 3px;
+  text-align: start;
+  width: 48px;
+}
+
+.tweetBody {
+  -webkit-locale: en;
+  color: rgb(41, 47, 51);
+  cursor: pointer;
+  display: block;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  /* height: 36px; */
+  line-height: 18px;
+  list-style-image: none;
+  list-style-position: outside;
+  list-style-type: none;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-top: 0px;
+  text-align: start;
+  white-space: pre-wrap;
+  width: 506px;
+  word-wrap: break-word;
+}
+
+.tweet {
+  border-bottom-color: rgb(225, 232, 237);
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  color: rgb(41, 47, 51);
+  cursor: pointer;
+  display: block;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  /* height: 66px; */
+  line-height: 18px;
+  list-style-image: none;
+  list-style-position: outside;
+  list-style-type: none;
+  min-height: 51px;
+  padding-bottom: 9px;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 9px;
+  position: relative;
+  text-align: start;
+  width: 564px;
+}
