@@ -1,5 +1,5 @@
-// (c) Mathieu Bruyen - http://mais-h.eu/
-// License: MIT (http://www.opensource.org/licenses/mit-license.php)
+// Modified version from (c) Mathieu Bruyen - http://mais-h.eu/
+// Modified by (c) Pablo E. Colazurdo - @pcolazurdo
 
 var nano = require('nano');
 var when = require('when');
@@ -7,99 +7,15 @@ var apply = require('when/apply');
 
 // # CouchDB pagination
 //
-// [Connect](http://www.senchalabs.org/connect/) middleware for paginated [CouchDB](https://couchdb.apache.org/) views.
-// Inspired from [CouchDB guide](http://guide.couchdb.org/draft/recipes.html#pagination), but left the dealbreaker part
-// out (expects keys to be unique, either emitted by only one document or reduced).
+// Inspired from couchdb-paginate by Mathieu Bruyen - http://mais-h.eu/ (https://github.com/mathbruyen/couchdb-paginate)
 //
-// Source [repository](https://github.com/mathbruyen/couchdb-paginate).
-//
-// ## Examples
-//
-// ### Reduced values
-//
-// View with both a `map` and a reduce function:
-//
-//     var paginate = require('couchdb-paginate');
-//     app.get('/list/:start', paginate({
-//       couchURI: 'http://localhost:5984',
-//       database: 'dbname',
-//       design: 'mydesign',
-//       view: 'myview'
-//     }), function (req, res, next) { /* display */ });
-//
-// ### Indexed documents
-//
-// View with only a `map` function like `function (doc) { emit(doc.key, null); }`:
-//
-//     var paginate = require('couchdb-paginate');
-//     app.get('/list/:start', paginate({
-//       couchURI: 'http://localhost:5984',
-//       database: 'dbname',
-//       design: 'mydesign',
-//       view: 'myview',
-//       useDocuments: true
-//     }), function (req, res, next) { /* display */ });
-//
-// ### API access (JSON)
-//
-// View with only a `map` function like `function (doc) { emit(doc.key, null); }`:
-//
-//     var paginate = require('couchdb-paginate');
-//     app.get('/api/list/:start', paginate({
-//       couchURI: 'http://localhost:5984',
-//       database: 'dbname',
-//       design: 'mydesign',
-//       view: 'myview',
-//       asJson: true
-//     }));
-//
-// ### View displaying
-//
-// View with only a `map` function like `function (doc) { emit(doc.key, null); }`:
-//
-//     var paginate = require('couchdb-paginate');
-//     app.get('/list/:start', paginate({
-//       couchURI: 'http://localhost:5984',
-//       database: 'dbname',
-//       design: 'mydesign',
-//       view: 'myview',
-//       renderView: 'myview.jade'
-//     }));
-//
-// ### Complex keys
-//
-// Blog posts example: comments attached to posts, organized by timestamp.
-//
-// Document example:
-//
-//     { postId: "abcdef", timestamp: 1234, author: "Foo", comment: "Bar" }
-//
-// Map function (no reduce function):
-//
-//     function (doc) { emit([doc.postId, doc.timestamp], null); }
-//
-// Pagination of comments for a given post exposed as an JSON API:
-//
-//     var paginate = require('couchdb-paginate');
-//     app.get('/comments/:post/:startTimestamp', paginate({
-//       couchURI: 'http://localhost:5984',
-//       database: 'dbname',
-//       design: 'blogposts',
-//       view: 'comments_by_post',
-//       useDocuments: true
-//       asJson: true,
-//       getBounds: function (req) {
-//         return [
-//           [req.params.post, 0],
-//           [req.params.post, req.params.startTimestamp],
-//           [req.params.post, 9007199254740992]
-//         ];
-//       }
-//     }));
+
+
 module.exports = function (config) {
   //if (typeof config.database != 'nano') {
   //  throw new TypeError('"database" is not a nano connection');
   //}
+  console.log(config);
   var db = config.database;
   var design = config.design;
   if (typeof design != 'string') {
@@ -110,8 +26,6 @@ module.exports = function (config) {
     throw new TypeError('"view" is not a string');
   }
   var options = config.options;
-
-
 
   var getBounds;
   if (typeof config.getBounds == 'function') {
@@ -204,25 +118,17 @@ module.exports = function (config) {
   function query(startkey, endkey, limit, include_docs, descending) {
 
     // General data, allowing not to specify `include_docs` or `descending`.
-    var obj = {
-      limit: limit
-    };
-    if (reduce) {
-      obj.group = true;
-    }
-    if (include_docs) {
-      obj.include_docs = true;
-    }
-    if (descending) {
-      obj.descending = true;
-    }
+    //var obj = {
+    //  limit: limit
+    //};
+    options.limit = limit;
     // In case the start key is undefined (start page with no lowest key), do not include it in the request.
     if (startkey !== undefined) {
-      obj.startkey = startkey;
+      options.startkey = startkey;
     }
     // In case the end key is undefined (no lowest key or no uppermost key), do not include it in the request.
     if (endkey !== undefined) {
-      obj.endkey = endkey;
+      options.endkey = endkey;
     }
     // Do the query and return a promise that holds the body.
     var deferred = when.defer();
@@ -232,7 +138,7 @@ module.exports = function (config) {
         console.log("Error: ", err);
         deferred.reject(err);
       } else {
-        console.log("Body: ", body);
+        //console.log("Body: ", body);
         deferred.resolve(body);
       }
     });
@@ -310,12 +216,14 @@ module.exports = function (config) {
           var i;
           // Select values only for the page range.
           for (i = 0; i < pageSize && i < body.rows.length; i++) {
-            documents.push(body.rows[i].value);
+            //documents.push(body.rows[i].value);
+            documents.push(body.rows[i]);
           }
           // Select start page indexes.
           for (i = pageSize; i < body.rows.length; i += pageSize) {
             pages.push(body.rows[i].key);
           }
+          //console.log("1:", documents, pages);
           documentsDef.resolve(documents);
           nextDef.resolve(pages);
         }

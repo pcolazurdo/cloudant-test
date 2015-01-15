@@ -28,6 +28,11 @@ if (env != 'PROD') {
 }
 
 var express = require('express');
+var errorHandler = require('errorhandler');
+var bodyParser = require('body-parser');
+
+
+
 var url = require('url');
 var querystring = require('querystring');
 var util = require('util');
@@ -57,9 +62,10 @@ logger.info("Config information: ", configApp);
 
 // setup middleware
 var app = express();
-app.use(express.errorHandler());
-app.use(express.urlencoded()); // to support URL-encoded bodies
-app.use(app.router);
+app.use(errorHandler());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 
 app.use(express.static(__dirname + '/public')); //setup static public directory
 app.set('view engine', 'jade');
@@ -196,7 +202,7 @@ function countView(callback) {
 				} else {
 					//logger.debug(body);
 					body.rows.forEach(function(doc) {
-						logger.debug("doc", doc);
+						//logger.debug("doc", doc);
 						var date = new Date(parseInt(doc.key));
 						status = {'count': count, 'lasttimestamp': date};
 					});
@@ -216,7 +222,7 @@ twit.stream('user', {track: configApp.track}, function(stream) {
     stream.on('data', function(data) {
         //logger.debug(typeof data.target_object);
 				//logger.debug(typeof data.id_str);
-				logger.debug(util.inspect(data));
+				//logger.debug(util.inspect(data));
 				// Only insert tweets
 				if (typeof data.id_str !== 'undefined') insert_doc(data);
     });
@@ -319,19 +325,23 @@ app.get("/json/geo.json", function (req,res) {
 });
 
 
-app.get("/tweets/:page",  paginate({
-	database: db,
-	design: "design1",
-	view: "lastTimeView",
-	asJson: true,
-	options: {
-		"include_docs": true,
-		"limit": 50, //pageSize + 1 || 10 + 1,
-		"reduce": false,
-		"group": false,
-		"descending": true
-	}
-}));
+
+
+app.get("/tweets/:start?",
+	paginate( {
+		database: db,
+		pageSize: 10,
+		design: "design1",
+		view: "lastTimeView",
+		asJson: true,
+		options: {
+			"include_docs": true,
+			"reduce": false,
+			"group": false,
+			"descending": true
+		}
+	})
+);
 
 app.get("/json/tweets.json", function (req,res) {
 	nextKey = {
@@ -382,29 +392,60 @@ function tweetView(firstKey, pageSize, callback) {
 }
 
 app.get("/main", function (req,res) {
-  // var tweets = new Array();
-	// tweets.push( {
-	// 	avatar     : "doc.profile_image_url",
-	// 	text       : "doc.text",
-	// 	date       : "new Date(doc.timestamp_ms)",
-	// 	screenname : "doc.user.screen_name"
-	// });
+	var options = {
+		hostname: req.hostname,
+		port: 3000,
+		path: '/tweets/',
+		method: 'GET',
+		headers: { 'Content-Type': 'application/json' }
+	};
 
-	tweetView(null, 10, function( status ) {
-		var markup = React.renderComponentToString(
-			TweetsApp({
-				tweets: status.tweets
-			})
-		);
+	//logger.debug("Req:", req);
+	//logger.debug("Body: ", req.body);
+	logger.debug("Options: ", options, typeof(options));
 
-		//logger.debug("markup: ", markup);
-
-		// Render our 'home' template
-		res.render('main', {
-			markup: markup, // Pass rendered react markup
-			state: JSON.stringify(status.tweets) // Pass current state to client side
+	var reqA = http.request(options, function(resA) {
+		resA.setEncoding('utf8');
+		var completeData = "";
+		resA.on('data', function (data) {
+				completeData += data;
+			});
+		resA.on('end', function () {
+			  var tweets = [];
+			  var status = {};
+				var jsonData = JSON.parse(completeData);
+				jsonData.documents.forEach(function(doc) {
+					logger.debug("Doc: ", doc);
+					logger.debug("TimeStamp: ", doc.doc.timestamp_ms, new Date(Math.round(doc.doc.timestamp_ms/1000)));
+					if (doc.doc.text) {
+						tweets.push( {
+							_id				 : doc.doc._id,
+							avatar     : doc.doc.user.profile_image_url,
+							body       : doc.doc.text,
+							date       : new Date(doc.doc.timestamp_ms),
+							screenname : doc.doc.user.screen_name
+						});
+					}
+				});
+				status.documents = tweets;
+				status.netxtIds = jsonData.nextIds;
+				logger.debug(status);
+				var markup = React.renderComponentToString(
+					TweetsApp({
+						tweets: status
+					})
+				);
+				logger.debug("Markup:", markup, typeof(markup));
+				res.render('main', {
+					markup: markup, // Pass rendered react markup
+					state: JSON.stringify(jsonData) // Pass current state to client side
+				});
+			});
 		});
-	});
+		reqA.end();
+		// Render our 'home' template
+
+
 });
 
 

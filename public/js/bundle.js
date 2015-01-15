@@ -52,6 +52,7 @@ var React = require('react');
 module.exports = Tweet = React.createClass({displayName: 'Tweet',
   render: function(){
     var tweet = this.props.tweet;
+    console.log("Tweet:", tweet);
     return (
       React.DOM.span({className: "tweet" + (tweet.active ? ' active' : '')}, 
         React.DOM.img({src: tweet.avatar, className: "avatar"}), 
@@ -75,7 +76,8 @@ module.exports = Tweets = React.createClass({displayName: 'Tweets',
   render: function(){
 
     // Build list items of single tweet components using map
-    var content = this.props.tweets.map(function(tweet){
+    var content = this.props.tweets.documents.map(function(tweet){
+      console.log(tweet);
       return (
         Tweet({key: tweet._id, tweet: tweet})
       )
@@ -109,16 +111,16 @@ module.exports = TweetsApp = React.createClass({displayName: 'TweetsApp',
     var updated = this.state.tweets;
 
     // Increment the unread count
-    var count = this.state.count + 1;
+    //var count = this.state.count + 1;
 
     // Increment the skip count
-    var skip = this.state.skip + 1;
+    //var skip = this.state.skip + 1;
 
     // Add tweet to the beginning of the tweets array
     updated.unshift(tweet);
 
     // Set application state
-    this.setState({tweets: updated, count: count, skip: skip});
+    this.setState({tweets: updated});
 
   },
 
@@ -128,7 +130,7 @@ module.exports = TweetsApp = React.createClass({displayName: 'TweetsApp',
     // Setup our ajax request
     var request = new XMLHttpRequest(), self = this;
     //request.open('GET', 'json/' + page + "/" + this.state.skip, true);
-    request.open('GET', '/json/tweets.json', true);
+    request.open('GET', '/twitter/' + page, true);
     request.onload = function() {
 
       // If everything is cool...
@@ -157,7 +159,7 @@ module.exports = TweetsApp = React.createClass({displayName: 'TweetsApp',
     var updated = this.state.tweets;
 
     // Mark our tweets active
-    updated.forEach(function(tweet){
+    updated.documents.forEach(function(tweet){
       tweet.active = true;
     });
 
@@ -173,14 +175,14 @@ module.exports = TweetsApp = React.createClass({displayName: 'TweetsApp',
     var self = this;
 
     // If we still have tweets...
-    if(tweets.length > 0) {
+    if(tweets.documents.length > 0) {
 
       // Get current application state
       var updated = this.state.tweets;
 
       // Push them onto the end of the current tweets array
-      tweets.forEach(function(tweet){
-        updated.push(tweet);
+      tweets.documents.forEach(function(tweet){
+        updated.documents.push(tweet);
       });
 
       // This app is so fast, I actually use a timeout for dramatic effect
@@ -212,7 +214,7 @@ module.exports = TweetsApp = React.createClass({displayName: 'TweetsApp',
     if(scrolled && !this.state.paging && !this.state.done) {
 
       // Set application state (Paging, Increment page)
-      this.setState({paging: true, page: this.state.page + 1});
+      this.setState({paging: true, page: this.state.tweets.nextIds[0]});
 
       // Get the next page of tweets from the server
       this.getPage(this.state.page);
@@ -229,7 +231,7 @@ module.exports = TweetsApp = React.createClass({displayName: 'TweetsApp',
     return {
       tweets: props.tweets,
       count: 0,
-      page: 0,
+      page: null,
       paging: false,
       skip: 0,
       done: false
@@ -265,7 +267,6 @@ module.exports = TweetsApp = React.createClass({displayName: 'TweetsApp',
 
   // Render the component
   render: function(){
-    //this.getPage(this.state.page);
     return (
       React.DOM.div({className: "tweets-app"}, 
         Tweets({tweets: this.state.tweets}), 

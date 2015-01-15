@@ -9,7 +9,8 @@ module.exports = Tweets = React.createClass({
   render: function(){
 
     // Build list items of single tweet components using map
-    var content = this.props.tweets.map(function(tweet){
+    var content = this.props.tweets.documents.map(function(tweet){
+      console.log(tweet);
       return (
         <Tweet key={tweet._id} tweet={tweet} />
       )
