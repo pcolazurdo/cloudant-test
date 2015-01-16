@@ -361,14 +361,20 @@ app.get("/tweets/:start?",
 
 
 
-app.get("/index", function (req,res) {
+app.get("/", function (req,res) {
 	var options = {
-		hostname: req.hostname,
-		port: 3000,
 		path: '/tweets/',
 		method: 'GET',
 		headers: { 'Content-Type': 'application/json' }
 	};
+	localUrl = url.parse(req.headers.host);
+	logger.debug("localUrl: ", localUrl);
+	if (localUrl.protocol == 'localhost:') {
+		options.hostname = 'localhost';
+		options.port = parseInt(localUrl.host);
+	} else {
+		options.hostname = localUrl.hostname;
+	}
 
 	//logger.debug("Req:", req);
 	//logger.debug("Body: ", req.body);
