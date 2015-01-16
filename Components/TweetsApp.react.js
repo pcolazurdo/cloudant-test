@@ -35,14 +35,17 @@ module.exports = TweetsApp = React.createClass({
     // Setup our ajax request
     var request = new XMLHttpRequest(), self = this;
     //request.open('GET', 'json/' + page + "/" + this.state.skip, true);
-    request.open('GET', '/twitter/' + page, true);
+    console.log("Requesting: ", page);
+    request.open('GET', '/tweets/' + page, true);
     request.onload = function() {
 
       // If everything is cool...
       if (request.status >= 200 && request.status < 400){
+        var jsonData = JSON.parse(request.responseText);
+        console.log("Status: ", status);
 
         // Load our next page
-        self.loadPagedTweets(JSON.parse(request.responseText));
+        self.loadPagedTweets(jsonData);
 
       } else {
 
@@ -89,6 +92,7 @@ module.exports = TweetsApp = React.createClass({
       tweets.documents.forEach(function(tweet){
         updated.documents.push(tweet);
       });
+      updated.nextIds = tweets.nextIds;
 
       // This app is so fast, I actually use a timeout for dramatic effect
       // Otherwise you'd never see our super sexy loader svg
@@ -109,16 +113,20 @@ module.exports = TweetsApp = React.createClass({
 
   // Method to check if more tweets should be loaded, by scroll position
   checkWindowScroll: function(){
-    this.getPage(this.state.page);
+    //this.getPage(this.state.page);
     // Get scroll pos & window data
-    var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    var s = (document.body.scrollTop || document.documentElement.scrollTop || 0);
-    var scrolled = (h + s) > document.body.offsetHeight;
+    //var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    //var s = (document.body.scrollTop || document.documentElement.scrollTop || 0);
+    //var scrolled = (h + s) > document.body.offsetHeight;
+    scrolled = (window.innerHeight + window.scrollY) >= document.body.offsetHeight;
 
     // If scrolled enough, not currently paging and not complete...
+    //console.log("Scrolled: ", scrolled);
     if(scrolled && !this.state.paging && !this.state.done) {
 
       // Set application state (Paging, Increment page)
+      console.log("Hello:", this.state.tweets);
+      console.log("Bye: ", this.state.tweets.nextIds[0]);
       this.setState({paging: true, page: this.state.tweets.nextIds[0]});
 
       // Get the next page of tweets from the server
@@ -136,7 +144,7 @@ module.exports = TweetsApp = React.createClass({
     return {
       tweets: props.tweets,
       count: 0,
-      page: null,
+      page: "",
       paging: false,
       skip: 0,
       done: false

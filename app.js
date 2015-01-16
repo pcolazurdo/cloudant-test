@@ -324,72 +324,42 @@ app.get("/json/geo.json", function (req,res) {
 	});
 });
 
-
-
-
 app.get("/tweets/:start?",
 	paginate( {
 		database: db,
 		pageSize: 10,
 		design: "design1",
 		view: "lastTimeView",
-		asJson: true,
+		//asJson: true,
 		options: {
 			"include_docs": true,
 			"reduce": false,
 			"group": false,
 			"descending": true
 		}
-	})
+	}), function (req, res, next) {
+		var status = {};
+		var tweets = [];
+		//status.documents = req.documents;
+		req.documents.forEach(function(doc) {
+			//logger.debug("Doc: ", doc);
+			if (doc.doc.text) {
+				tweets.push( {
+					avatar     : doc.doc.user.profile_image_url,
+					body       : doc.doc.text,
+					date       : new Date(Math.round(doc.doc.timestamp_ms/1000)),
+					screenname : doc.doc.user.screen_name
+				});
+			}
+		});
+		status.documents = tweets;
+		status.nextIds = req.nextIds;
+		logger.debug(status);
+		res.json(status);
+	}
 );
 
-app.get("/json/tweets.json", function (req,res) {
-	nextKey = {
-		key : req.query.startkey || null,
-		docid : req.query.docidkey || null
-	};
-	tweetView(nextKey, req.query.pagesize || 50, function (status) {
-		res.json(status.tweets);
-	});
-});
 
-
-
-function tweetView(firstKey, pageSize, callback) {
-	var status = {};
-	var tweets = [];
-	options = {
-		"include_docs": true,
-		"limit": pageSize + 1 || 10 + 1,
-		"reduce": false,
-		"group": false,
-		"descending": true
-	};
-	if (firstKey && firstKey.key && firstKey.docid) {
-		options.startkey = firstkey.key;
-		options.startkey_docid = firstkey.docid;
-	}
-	logger.debug("tweetView options: ", options);
-	db.view("design1", "lastTimeView", options, function(err, data) {
-		if (!err) {
-			data.rows.forEach(function(doc) {
-				//logger.debug("Doc: ", doc);
-				if (doc.doc.text) {
-					tweets.push( {
-						avatar     : doc.doc.user.profile_image_url,
-						body       : doc.doc.text,
-						date       : new Date(doc.doc.timestamp_ms),
-						screenname : doc.doc.user.screen_name
-					});
-				}
-			});
-			status.tweets = tweets;
-		} else {
-			logger.error("error on tweetsView:", err);
-		}
-		callback(status);
-	});
-}
 
 app.get("/main", function (req,res) {
 	var options = {
@@ -411,31 +381,13 @@ app.get("/main", function (req,res) {
 				completeData += data;
 			});
 		resA.on('end', function () {
-			  var tweets = [];
-			  var status = {};
 				var jsonData = JSON.parse(completeData);
-				jsonData.documents.forEach(function(doc) {
-					logger.debug("Doc: ", doc);
-					logger.debug("TimeStamp: ", doc.doc.timestamp_ms, new Date(Math.round(doc.doc.timestamp_ms/1000)));
-					if (doc.doc.text) {
-						tweets.push( {
-							_id				 : doc.doc._id,
-							avatar     : doc.doc.user.profile_image_url,
-							body       : doc.doc.text,
-							date       : new Date(doc.doc.timestamp_ms),
-							screenname : doc.doc.user.screen_name
-						});
-					}
-				});
-				status.documents = tweets;
-				status.netxtIds = jsonData.nextIds;
-				logger.debug(status);
 				var markup = React.renderComponentToString(
 					TweetsApp({
-						tweets: status
+						tweets: jsonData
 					})
 				);
-				logger.debug("Markup:", markup, typeof(markup));
+				//logger.debug("Markup:", markup, typeof(markup));
 				res.render('main', {
 					markup: markup, // Pass rendered react markup
 					state: JSON.stringify(jsonData) // Pass current state to client side
