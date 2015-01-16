@@ -11,60 +11,64 @@ head
 
 
 body
-  block row-content
+  block content
     if error
       div.well
         div.form-group.row
           div.col-lg-12
             p(style="font-weight:bold;color:red;") Error: #{error}
     else
-      div.row
-        div.col-lg-12
-          h2 Some Graphs
-          h2(style="text-align:center") Hashtags
-          div.placeholder#placeholder(style="width:960px;height:960px;margin:0px auto")
-          <script src="js/hashtagcloud.js"></script>
+      div.container-fluid
+        div.row
+          div(class="col-sm-3 col-md-2 sidebar")
+            ul(class="nav nav-sidebar")
+              <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+              <li><a href="#">Reports</a></li>
+              <li><a href="#">Analytics</a></li>
+              <li><a href="#">Export</a></li>
 
-      div.row
-        div.col-lg-12
-          h2 Mapping
-          script.
-            var map;
+          div(class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main")
+            div.row-placeholders
+            <h1 class="page-header">Some Graphs</h1>
+            div.placeholder#placeholder(style="width:960px;height:960px;margin:0px auto")
+            <script src="js/hashtagcloud.js"></script>
+          div(class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main")
+            div.row-placeholders
+              h2 Mapping
+              script.
+                var map;
 
-            function initialize() {
-              map = new google.maps.Map(document.getElementById('map-canvas'), {
-                zoom: 2,
-                center: new google.maps.LatLng(2.8,-187.3),
-                mapTypeId: google.maps.MapTypeId.TERRAIN
-              });
+                function initialize() {
+                  map = new google.maps.Map(document.getElementById('map-canvas'), {
+                    zoom: 2,
+                    center: new google.maps.LatLng(2.8,-187.3),
+                    mapTypeId: google.maps.MapTypeId.TERRAIN
+                  });
 
-            map.data.setStyle(function(feature) {
-              var ascii = feature.getProperty('size');
-              var color = ascii > 2 ? 'red' : 'blue'; console.log(color);
-              return {
-                icon: {
-                  path: google.maps.SymbolPath.CIRCLE, strokeColor: color, fillColor: color, fillOpacity: 1,
-                  scale: 5
+                map.data.setStyle(function(feature) {
+                  var ascii = feature.getProperty('size');
+                  var color = ascii > 2 ? 'red' : 'blue'; console.log(color);
+                  return {
+                    icon: {
+                      path: google.maps.SymbolPath.CIRCLE, strokeColor: color, fillColor: color, fillOpacity: 1,
+                      scale: 5
+                    }
+                  };
+                });
+
+                map.data.loadGeoJson('/json/geo.json');
                 }
-              };
-            });
 
-            map.data.loadGeoJson('/json/geo.json');
-            }
+                google.maps.event.addDomListener(window, 'load', initialize)
 
-            google.maps.event.addDomListener(window, 'load', initialize)
+              <div id="map-canvas" style="width:960px;height:960px;margin:0px auto"></div>
 
-          <div id="map-canvas" style="width:960px;height:960px;margin:0px auto"></div>
-
-      div.row
-        div.col-lg-12
-          h2 Document Count
-          if count
-            div.well
-              div.form-group.row
-                div.col-lg-12
-                  p
-                    b #{count}
-                div.col-lg-12
-                  p
-                    b #{lasttimestamp}
+        div(class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main")
+            div.row-placeholders
+              h2 Document Count
+              if count
+                  div.form-group.row
+                      p
+                        b #{count}
+                      p
+                        b #{lasttimestamp}

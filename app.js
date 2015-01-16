@@ -245,10 +245,10 @@ twit.stream('user', {track: configApp.track}, function(stream) {
 //
 
 // render index page
-app.get('/', function(req, res){
-    logger.debug("GET /");
-    res.render('index');
-});
+//app.get('/', function(req, res){
+//    logger.debug("GET /");
+//    res.render('index');
+//});
 
 app.get('/status0', function(req, res){
 	logger.debug("GET /");
@@ -361,7 +361,7 @@ app.get("/tweets/:start?",
 
 
 
-app.get("/main", function (req,res) {
+app.get("/index", function (req,res) {
 	var options = {
 		hostname: req.hostname,
 		port: 3000,

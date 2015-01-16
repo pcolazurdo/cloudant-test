@@ -11,33 +11,43 @@ head
 
 
 body
-  block row-content
+  block content
+    div.container-fluid
+      div.row
+        div(class="col-sm-3 col-md-2 sidebar")
+          ul(class="nav nav-sidebar")
+            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Analytics</a></li>
+            <li><a href="#">Export</a></li>  
+
+
+
     if error
       div.well
         div.form-group.row
           div.col-lg-12
             p(style="font-weight:bold;color:red;") Error: #{error}
     else
-      div.row
-        div.col-lg-12
-          h2 Some Graphs
-          h2(style="text-align:center") Tweets Evolution
-          div.flot-placeholder#flot-placeholder1(style="width:75%;height:300px;margin:0px auto")
-          div.flot-placeholder#flot-overview1(style="width:75%;height:50px;margin:0px auto")
-          script.
-            function getValues() {
-              return !{values};
-            }
-          script(src="js/timestampView.js")
-      div.row
-        div.col-lg-12
-          h2 Document Count
-          if count
-            div.well
-              div.form-group.row
-                div.col-lg-12
-                  p
-                    b #{count}
-                div.col-lg-12
-                  p
-                    b #{lasttimestamp}
+        div(class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main")
+            div.row-placeholders
+              h2(style="text-align:center") Tweets Evolution
+              div.flot-placeholder#flot-placeholder1(style="width:75%;height:300px;margin:0px auto")
+              div.flot-placeholder#flot-overview1(style="width:75%;height:50px;margin:0px auto")
+              script.
+                function getValues() {
+                  return !{values};
+                }
+              script(src="js/timestampView.js")
+        div(class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main")
+          div.row-placeholders
+            h2 Document Count
+            if count
+              div.well
+                div.form-group.row
+                  div.col-lg-12
+                    p
+                      b #{count}
+                  div.col-lg-12
+                    p
+                      b #{lasttimestamp}
