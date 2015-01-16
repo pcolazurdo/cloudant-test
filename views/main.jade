@@ -3,13 +3,12 @@ extends ./layout.jade
 block head
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script type="text/javascript" src="/js/jquery.js"></script>
-    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
     <script src="http://fb.me/react-with-addons-0.12.2.js"></script>
+
 
 block body
   block content
+
     div.container-fluid
       div.row
         div(class="col-sm-3 col-md-2 sidebar")
@@ -24,8 +23,4 @@ block body
             <h1 class="page-header">Timeline</h1>
             <section id="react-app">!{markup}</div>
             <script id="initial-state" type="application/json">!{state}</script>
-
-block footer
-  <script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
-  <script src="/js/bundle.js"></script>
-  <script src="/js/bootstrap.min.js"></script>
+    script(src="/js/bundle.js")

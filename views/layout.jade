@@ -11,13 +11,13 @@ html(lang="en")
     block headdefault
       <script type="text/javascript" src="/js/jquery.js"></script>
       <script type="text/javascript" src="/js/bootstrap.min.js"></script>
-      <script type="text/javascript" src="/js/jquery.js"></script>
       <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
       <link rel="stylesheet" type="text/css" href="/css/style.css">
       <script src="http://fb.me/react-with-addons-0.12.2.js"></script>
     block head
 
   body
+    block nav
       nav(class='navbar navbar-inverse navbar-fixed-top' role='navigation')
         div.container-fluid
           div.navbar-header
@@ -37,9 +37,3 @@ html(lang="en")
           </ul>
           </div>
     block content
-
-      block footer
-        #footer
-              .container
-                  p(class="text-muted credit")
-                      | follow me at <a href="http://twitter.com/pcolazurdo"> @pcolazurdo </a>

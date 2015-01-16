@@ -333,8 +333,7 @@ app.get("/tweets/:start?",
 		//asJson: true,
 		options: {
 			"include_docs": true,
-			"reduce": false,
-			"group": false,
+			"reduce": false,			
 			"descending": true
 		}
 	}), function (req, res, next) {
@@ -369,11 +368,15 @@ app.get("/", function (req,res) {
 	};
 	localUrl = url.parse(req.headers.host);
 	logger.debug("localUrl: ", localUrl);
+	logger.debug("req: ", req.headers);
 	if (localUrl.protocol == 'localhost:') {
 		options.hostname = 'localhost';
 		options.port = parseInt(localUrl.host);
 	} else {
-		options.hostname = localUrl.hostname;
+		if (localUrl.protocol === null && localUrl.hostname === null) {
+			options.hostname = localUrl.href;
+			options.port = 80;
+		}
 	}
 
 	//logger.debug("Req:", req);
