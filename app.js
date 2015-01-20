@@ -421,16 +421,6 @@ app.get('/api/logrequest', function(req, res){
 });
 
 
-function JSONize(str) {
-	return str.replace(/([\$\w]+)\s*:/g, function(_, $1){
-		return '"'+$1+'":';
-	});
-	// wrap keys without quote with valid double quote
-
-	// replacing single quote wrapped ones to double quote
-	//.replace(/'([^']+)'/g, function(_, $1){return '"'+$1+'"'})
-}
-
 app.get('/api/getrequests', function(req, res){
 	res.set('Content-Type', 'text/html');
 	var buffer = "";
