@@ -40,7 +40,10 @@ var twitter = require('twitter');
 var http = require('http');
 var https = require('https');
 var xmlescape = require('xml-escape');
+
+// Application Modules
 var paginate = require('./couchdb-paginate');
+var circular = require('./circularCache');
 
 
 // React
@@ -169,6 +172,7 @@ if (cloudant) {
 	});
 	var db = nano.use(db_name);
 }
+
 
 
 // Function to insert a new Doc into the Cloudant database
@@ -333,7 +337,7 @@ app.get("/tweets/:start?",
 		//asJson: true,
 		options: {
 			"include_docs": true,
-			"reduce": false,			
+			"reduce": false,
 			"descending": true
 		}
 	}), function (req, res, next) {
@@ -411,6 +415,54 @@ app.get("/", function (req,res) {
 
 
 
+app.get('/api/logrequest', function(req, res){
+	circular.addItem(req);
+	res.status(200).send("Logged OK");
+});
+
+
+function JSONize(str) {
+	return str.replace(/([\$\w]+)\s*:/g, function(_, $1){
+		return '"'+$1+'":';
+	});
+	// wrap keys without quote with valid double quote
+
+	// replacing single quote wrapped ones to double quote
+	//.replace(/'([^']+)'/g, function(_, $1){return '"'+$1+'"'})
+}
+
+app.get('/api/getrequests', function(req, res){
+	res.set('Content-Type', 'text/html');
+	var buffer = "";
+	buffer += "<!doctype html><HEAD></HEAD><BODY>";
+	circular.getItems().map(function (a) {
+		buffer += util.inspect(a, { showHidden: true, depth: 5 }).replace(/[\n\r]/g, '<br />\n');
+	});
+	buffer +=	"</BODY>" ;
+	res.send(buffer);
+	//console.log("getrequests", typeof(x), x);
+	//res.json(x);
+	//res.status(200).send(circular.getItems().toString());
+});
+
+
+app.get('/getrequests', function(req, res){
+	//circular.getItems().map(function (a) {
+	//	buffer += util.inspect(a, { showHidden: true, depth: 5 }).replace(/[\n\r]/g, '<br />\n');
+	//});
+
+	res.render('getrequests', { "values": circular.getItems().map(function (x) {
+			return util.inspect(x, { showHidden: true, depth: 5 });
+			//.replace(/[\n\r]/g, '<br />\n');
+			//.replace(/[\s]/g, '&nbsp;');
+		})
+	});
+	//console.log("getrequests", typeof(x), x);
+	//res.json(x);
+	//res.status(200).send(circular.getItems().toString());
+});
+
+
 // Status Watcher to check if Twitter stream is working - if not it shutdown the app waiting for bluemix infra to restart it.
 setInterval(function() {
 	logger.info("Checking twitter connection Status");
@@ -431,9 +483,6 @@ setInterval(function() {
 		}
 	});
 }, 300000);
-
-
-
 
 logger.info("Connected to port =" + port + " host =  " + host);
 app.listen(port, host);

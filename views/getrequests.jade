@@ -1,0 +1,38 @@
+//- main.jade
+extends ./layout.jade
+block head
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="http://fb.me/react-with-addons-0.12.2.js"></script>
+
+
+block body
+  block content
+
+    div.container-fluid
+      div.row
+        div(class="col-sm-3 col-md-2 sidebar")
+          ul(class="nav nav-sidebar")
+            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Analytics</a></li>
+            <li><a href="#">Export</a></li>
+
+        div(class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main")
+          div.row-placeholders
+            h1.page-header Requests Details
+            div.accordion
+              - var i=0
+              - var x = ""
+              - each val in values
+                - x = "value" + i
+                - i ++
+                  div.accordion-group
+                  - datatarget = "#" + x
+                    div.accordion-heading(data-toggle="collapse", data-parent="#accordion", data-target="#{datatarget}")
+                      h4.panel-title
+                        a.accordion-toggle
+                          Request Number #{i}
+                  div(id="#{x}", class="accordion-body collapse", style="white-space: pre")
+                    div.accordion-inner
+                      #{val}
