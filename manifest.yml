@@ -6,4 +6,4 @@ applications:
   name: pcolaz01
   command: node app.js
   path: .
-  memory: 128M
+  memory: 256M
