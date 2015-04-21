@@ -233,6 +233,9 @@ twit.stream('user', {track: configApp.track}, function(stream) {
 		stream.on('error', function(data) {
 				logger.error("Stream Error: ", util.inspect(data));
 		});
+		stream.on('done', function(data) {
+			logger.error("Stream done: ", util.inspect(data));
+		});
     //stream.on('favorite', function(data) {
     //    logger.debug(data.target_object.text);
     //    insert_doc(data, data.target_object.id_str, function (err, response) {
@@ -255,7 +258,7 @@ twit.stream('user', {track: configApp.track}, function(stream) {
 //});
 
 app.get('/status0', function(req, res){
-	logger.debug("GET /");
+	//logger.debug("GET /");
 	res.render('status0');
 });
 
@@ -265,7 +268,7 @@ app.get('/status', function(req, res){
 		db.view("design1", "timestampView", {"group": true, "reduce": true}, function(err, body) {
 			if (!err) {
 				body.rows.forEach(function(doc) {
-					logger.debug("/status: timeStampView", doc);
+					//logger.debug("/status: timeStampView", doc);
 					values.push ([doc.key, doc.value]);
 				});
 				countStatus.values = JSON.stringify(values);
@@ -311,10 +314,10 @@ app.get("/json/geo.json", function (req,res) {
 
 					if (coord && coord.coordinates) {
 						coord.coordinates = coord.coordinates.map( function (num) {
-							logger.debug(num);
+							//logger.debug(num);
 							str = num.toString();
 							//str = str.substring(0,str.length-2);
-							logger.debug(str);
+							//logger.debug(str);
 							return parseFloat(str);
 						});
 						values.features.push ( {'type': 'Feature', 'geometry':  coord , 'properties': {'size': doc.value}  } );
@@ -357,7 +360,7 @@ app.get("/tweets/:start?",
 		});
 		status.documents = tweets;
 		status.nextIds = req.nextIds;
-		logger.debug(status);
+		//logger.debug(status);
 		res.json(status);
 	}
 );
@@ -371,8 +374,8 @@ app.get("/", function (req,res) {
 		headers: { 'Content-Type': 'application/json' }
 	};
 	localUrl = url.parse(req.headers.host);
-	logger.debug("localUrl: ", localUrl);
-	logger.debug("req: ", req.headers);
+	//logger.debug("localUrl: ", localUrl);
+	//logger.debug("req: ", req.headers);
 	if (localUrl.protocol == 'localhost:') {
 		options.hostname = 'localhost';
 		options.port = parseInt(localUrl.host);
@@ -385,7 +388,7 @@ app.get("/", function (req,res) {
 
 	//logger.debug("Req:", req);
 	//logger.debug("Body: ", req.body);
-	logger.debug("Options: ", options, typeof(options));
+	//logger.debug("Options: ", options, typeof(options));
 
 	var reqA = http.request(options, function(resA) {
 		resA.setEncoding('utf8');
@@ -455,7 +458,7 @@ app.get('/getrequests', function(req, res){
 
 // Status Watcher to check if Twitter stream is working - if not it shutdown the app waiting for bluemix infra to restart it.
 setInterval(function() {
-	logger.info("Checking twitter connection Status");
+	//logger.info("Checking twitter connection Status");
 	var lastUpdated;
 	db.view("design1", "lastTimeView", {"limit": 1, "descending": true}, function(err, body) {
 		if (err) {
