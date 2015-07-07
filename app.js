@@ -10,7 +10,7 @@ var log4js = require('log4js');
 
 // Setup logging
 log4js.loadAppender('file');
-log4js.addAppender(log4js.appenders.file('output.log',null,1000000000,3,true));
+log4js.addAppender(log4js.appenders.file('output.log', null, 10000000, 3, true));
 log4js.replaceConsole(); // the important part
 var logger = log4js.getLogger();
 logger.setLevel(configApp.loggerLevel || "DEBUG");
