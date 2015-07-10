@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "pcolaz01",
   "main": "Trying to use some bluemix goodies!",
+  "engines": {
+    "node": "0.10.29",
+    "npm": "1.4.14"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1",
     "start": "node app.js",

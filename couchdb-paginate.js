@@ -3,7 +3,7 @@
 
 var nano = require('nano');
 var when = require('when');
-var apply = require('when/apply');
+var apply = require('when/apply'); //Don't upgrade when.js to version 3.x.x because it breaks this 
 
 // # CouchDB pagination
 //

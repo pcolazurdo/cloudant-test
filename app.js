@@ -8,6 +8,13 @@
 var configApp = require('./config.json');
 var log4js = require('log4js');
 
+if (process.env.VCAP_SERVICES) {
+	require("knj-plugin");
+	require("loganalysis");
+	require("bluemix-management-client");
+}
+
+
 // Setup logging
 log4js.loadAppender('file');
 log4js.addAppender(log4js.appenders.file('output.log', null, 10000000, 3, true));
@@ -15,6 +22,13 @@ log4js.replaceConsole(); // the important part
 var logger = log4js.getLogger();
 logger.setLevel(configApp.loggerLevel || "DEBUG");
 // End Setup logging
+
+if (process.env.VCAP_SERVICES) {
+	logger.info(process.env);
+	require("knj-plugin");
+	require("loganalysis");
+	require("bluemix-management-client");
+}
 
 //Capture all Unhandled Errors - seems not recommended in production so we use
 // it only if we aren't in PROD

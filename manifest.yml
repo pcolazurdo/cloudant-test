@@ -4,6 +4,5 @@ applications:
   - "Relationship Extraction-5e"
   - "Cloudant NoSQL DB-qa"
   name: pcolaz01
-  command: node app.js
   path: .
-  memory: 256M
+  memory: 512M
