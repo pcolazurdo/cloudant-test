@@ -15,7 +15,7 @@ module.exports = function (config) {
   //if (typeof config.database != 'nano') {
   //  throw new TypeError('"database" is not a nano connection');
   //}
-  console.log(config);
+  //console.log(config);
   var db = config.database;
   var design = config.design;
   if (typeof design != 'string') {
@@ -132,10 +132,10 @@ module.exports = function (config) {
     }
     // Do the query and return a promise that holds the body.
     var deferred = when.defer();
-    console.log("Acá estoy", design, view, options);
+    //console.log("Acá estoy", design, view, options);
     db.view(design, view, options, function (err, body) {
       if (err) {
-        console.log("Error: ", err);
+        //console.log("Error: ", err);
         deferred.reject(err);
       } else {
         //console.log("Body: ", body);

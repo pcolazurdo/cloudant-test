@@ -4,12 +4,11 @@
   "description": "pcolaz01",
   "main": "Trying to use some bluemix goodies!",
   "engines": {
-    "node": "0.10.29",
-    "npm": "1.4.14"
+    "node": "0.10.29"
   },
   "scripts": {
     "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1",
-    "start": "node app.js",
+    "start": "node app1.js",
     "watch": "watchify client.js -o public/js/bundle.js -v",
     "browserify": "browserify client.js > public/js/bundle.js",
     "browserify2": "browserify client.js | uglifyjs > public/js/bundle.js",

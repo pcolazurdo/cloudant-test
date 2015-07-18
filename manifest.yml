@@ -6,3 +6,6 @@ applications:
   name: pcolaz01
   path: .
   memory: 512M
+  env:
+    BLUEMIX_APP_MGMT_ENABLE: shell 
+    PABLO: TRUE
