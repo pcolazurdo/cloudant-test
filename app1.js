@@ -57,7 +57,8 @@ var circular = require('./circularCache');
 // React
 var JSX = require('node-jsx').install();
 var React = require('react');
-var TweetsApp = require('./components/TweetsApp.react');
+var TweetsApp = React.createFactory(require('./components/TweetsApp.react'));
+//var TweetsApp = require('./components/TweetsApp.react');
 
 //detect environment we're running - default is 'DEV'
 var env = process.env.NODE_ENV || 'DEV';
@@ -406,7 +407,7 @@ app.get("/", function (req,res) {
 			});
 		resA.on('end', function () {
 				var jsonData = JSON.parse(completeData);
-				var markup = React.renderComponentToString(
+				var markup = React.renderToString(
 					TweetsApp({
 						tweets: jsonData
 					})

@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1",
     "start": "node app1.js",
     "watch": "watchify client.js -o public/js/bundle.js -v",
-    "browserify": "browserify client.js > public/js/bundle.js",
+    "browserify": "browserify -t reactify client.js > public/js/bundle.js",
     "browserify2": "browserify client.js | uglifyjs > public/js/bundle.js",
     "build": "npm run browserify"
   },
@@ -21,8 +21,8 @@
     "jade": "^1.1.4",
     "log4js": "^0.6.21",
     "nano": "^6.0.2",
-    "node-jsx": "^0.11.0",
-    "react": "^0.11.2",
+    "node-jsx": "^0.13.3",
+    "react": "^0.13.3",
     "twitter": "^1.0.1",
     "when": "^1.8.1",
     "xml-escape": "^1.0.0"
@@ -42,10 +42,10 @@
     "grunt-git": "^0.3.2",
     "grunt-shell": "^1.1.1",
     "js-yaml": "^3.2.3",
-    "browserify": "~6.0.3",
-    "reactify": "~0.14.0",
-    "uglify-js": "~2.4.15",
-    "watchify": "~2.0.0"
+    "browserify": "~11.0.1",
+    "reactify": "~1.1.1",
+    "uglify-js": "~2.4.24",
+    "watchify": "~3.3.1"
   },
   "browserify": {
     "transform": [
