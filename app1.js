@@ -232,9 +232,9 @@ var twit = new twitter(configTwitter);
 
 twit.stream('user', {track: configApp.track}, function(stream) {
     stream.on('data', function(data) {
-        //logger.debug(typeof data.target_object);
-				//logger.debug(typeof data.id_str);
-				//logger.debug(util.inspect(data));
+        logger.debug(typeof data.target_object);
+				logger.debug(typeof data.id_str);
+				logger.debug(util.inspect(data));
 				// Only insert tweets
 				if (typeof data.id_str !== 'undefined') insert_doc(data);
     });

@@ -1,11 +1,9 @@
 applications:
 - services:
-  - "Language Identification-bk"
-  - "Relationship Extraction-5e"
   - "Cloudant NoSQL DB-qa"
-  name: pcolaz01
+  name: pcolaz02
   path: .
   memory: 512M
   env:
-    BLUEMIX_APP_MGMT_ENABLE: shell 
+    BLUEMIX_APP_MGMT_ENABLE: devconsole+shell+inspector 
     PABLO: TRUE
