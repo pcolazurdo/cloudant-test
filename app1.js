@@ -236,6 +236,7 @@ twit.stream('user', {track: configApp.track}, function(stream) {
         logger.debug(typeof data.target_object);
 				logger.debug(typeof data.id_str);
 				logger.debug(util.inspect(data));
+				logger.info("New tweet OK");
 				// Only insert tweets
 				if (typeof data.id_str !== 'undefined') insert_doc(data);
     });
@@ -395,9 +396,6 @@ app.get("/", function (req,res) {
 		}
 	}
 
-	//logger.debug("Req:", req);
-	//logger.debug("Body: ", req.body);
-	//logger.debug("Options: ", options, typeof(options));
 
 	var reqA = http.request(options, function(resA) {
 		resA.setEncoding('utf8');
