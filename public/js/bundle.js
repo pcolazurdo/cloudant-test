@@ -51,18 +51,37 @@ module.exports = NotificationBar = React.createClass({displayName: "Notification
 },{"react":162}],4:[function(require,module,exports){
 /** @jsx React.DOM */
 
+function linkify(inputText) {
+    var replacedText, replacePattern1, replacePattern2, replacePattern3;
+
+    //URLs starting with http://, https://, or ftp://
+    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+
+    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+
+    //Change email addresses to mailto:: links.
+    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+    return replacedText;
+}
+
 var React = require('react');
 
 module.exports = Tweet = React.createClass({displayName: "Tweet",
   render: function(){
     var tweet = this.props.tweet;
     //console.log("Tweet:", tweet);
+    var bodylinkified = linkify(tweet.body);
     return (
       React.createElement("span", {className: "tweet" + (tweet.active ? ' active' : '')}, 
         React.createElement("img", {src: tweet.avatar, className: "avatar"}), 
         React.createElement("a", {href: "http://www.twitter.com/" + tweet.screenname}, tweet.screenname), 
         React.createElement("cite", null, " at ", tweet.date, " "), 
-        React.createElement("p", {className: "tweetBody"}, tweet.body)
+        React.createElement("p", {className: "tweetBody"}, bodylinkified)
       )
     )
   }
