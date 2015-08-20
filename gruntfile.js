@@ -3,8 +3,21 @@ fs = require('fs');
 
 
 module.exports = function(grunt) {
+	var pkg = grunt.file.readJSON('package.json');
 	grunt.initConfig({
 		shell: {
+			push: {
+				command: function () {
+					grunt.log.writeln('Pushing ' + pkg.name + ' to bluemix');
+	        return 'cf push '+ pkg.name;
+				}
+			},
+			browserify: {
+				command: function () {
+					grunt.log.writeln('Browserifying ' + pkg.name);
+        	return 'npm run browserify';
+				}
+			},
 			cfpush: {
 				command: function () {
 					grunt.file.delete ("output.log");
@@ -67,7 +80,8 @@ module.exports = function(grunt) {
 	]);
 
 	grunt.registerTask('deploy', [
-		'push bluemix'
+		'shell:browserify',
+		'shell:push'
 	]);
 
 	grunt.registerTask('status', [

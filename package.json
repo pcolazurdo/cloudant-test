@@ -23,6 +23,7 @@
     "nano": "^6.0.2",
     "node-jsx": "^0.13.3",
     "react": "^0.13.3",
+    "react-linkify": "0.0.4",
     "twitter": "^1.0.1",
     "when": "^1.8.1",
     "xml-escape": "^1.0.0"
