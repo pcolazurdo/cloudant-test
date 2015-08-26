@@ -365,12 +365,13 @@ app.get("/tweets/:start?",
 		var tweets = [];
 		//status.documents = req.documents;
 		req.documents.forEach(function(doc) {
-			//logger.debug("Doc: ", doc);
+			logger.debug("Doc: ", doc);
 			if (doc.doc.text) {
 				tweets.push( {
 					avatar     : doc.doc.user.profile_image_url,
 					body       : doc.doc.text,
-					date       : new Date(Math.round(doc.doc.timestamp_ms/1000)),
+					//date       : new Date(Math.round(doc.doc.timestamp_ms/1000)),
+					date       : doc.doc.created_at,
 					screenname : doc.doc.user.screen_name
 				});
 			}
@@ -484,7 +485,7 @@ setInterval(function() {
 			});
 			//logger.debug("Time Diff between lastUpdated and now", Date.now() - lastUpdated);
 			if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
-				logger.error("No new twitter updates since", lastUpdated, "so quitting ...");				
+				logger.error("No new twitter updates since", lastUpdated, "so quitting ...");
 				setupTwitter();
 				//process.exit(1);
 			}
