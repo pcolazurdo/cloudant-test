@@ -226,35 +226,42 @@ function countView(callback) {
 	});
 }
 
-// TODO: Get application information and use it in your app.
-// var twitterInfo = JSON.parse(process.env.TWITTER_INFO || "{}");
 var configTwitter = require('./twitter-cred.json');
 var twit = new twitter(configTwitter);
 
-twit.stream('user', {track: configApp.track}, function(stream) {
-    stream.on('data', function(data) {
-        logger.debug(typeof data.target_object);
-				logger.debug(typeof data.id_str);
-				logger.debug(util.inspect(data));
-				logger.info("New tweet OK");
-				// Only insert tweets
-				if (typeof data.id_str !== 'undefined') insert_doc(data);
-    });
-		stream.on('error', function(data) {
-				logger.error("Stream Error: ", util.inspect(data));
-		});
-		stream.on('done', function(data) {
-			logger.error("Stream done: ", util.inspect(data));
-		});
-    //stream.on('favorite', function(data) {
-    //    logger.debug(data.target_object.text);
-    //    insert_doc(data, data.target_object.id_str, function (err, response) {
-    //        logger.debug(err || response);
-    //      });
-    //});
-    // Disconnect stream after five seconds
-    //setTimeout(stream.destroy, 5000);
-});
+function setupTwitter() {
+	// TODO: Get application information and use it in your app.
+	// var twitterInfo = JSON.parse(process.env.TWITTER_INFO || "{}");
+
+
+	twit.stream('user', {track: configApp.track}, function(stream) {
+	    stream.on('data', function(data) {
+	        logger.debug(typeof data.target_object);
+					logger.debug(typeof data.id_str);
+					logger.debug(util.inspect(data));
+					logger.info("New tweet OK");
+					// Only insert tweets
+					if (typeof data.id_str !== 'undefined') insert_doc(data);
+	    });
+			stream.on('error', function(data) {
+					logger.error("Stream Error: ", util.inspect(data));
+			});
+			stream.on('done', function(data) {
+				logger.error("Stream done: ", util.inspect(data));
+			});
+			stream.on('end', function(data) {
+				logger.error("Stream end: ", util.inspect(data));
+			});
+	    //stream.on('favorite', function(data) {
+	    //    logger.debug(data.target_object.text);
+	    //    insert_doc(data, data.target_object.id_str, function (err, response) {
+	    //        logger.debug(err || response);
+	    //      });
+	    //});
+	    // Disconnect stream after five seconds
+	    //setTimeout(stream.destroy, 5000);
+	});
+}
 
 
 //
@@ -477,12 +484,14 @@ setInterval(function() {
 			});
 			//logger.debug("Time Diff between lastUpdated and now", Date.now() - lastUpdated);
 			if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
-				logger.error("No new twitter updates since", lastUpdated, "so quitting ...");
-				process.exit(1);
+				logger.error("No new twitter updates since", lastUpdated, "so quitting ...");				
+				setupTwitter();
+				//process.exit(1);
 			}
 		}
 	});
 }, 300000);
 
 logger.info("Connected to port =" + port + " host =  " + host);
+setupTwitter();
 app.listen(port, host);
