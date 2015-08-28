@@ -69,20 +69,14 @@ logger.info("App Started: " + Date().toString());
 
 //logger.info("Config information: ", configApp);
 
-
-
-
 // setup middleware
 var app = express();
 app.use(errorHandler());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-
 app.use(express.static(__dirname + '/public')); //setup static public directory
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/views'); //optional since express defaults to CWD/views
-
 
 // There are many useful environment variables available in process.env.
 // VCAP_APPLICATION contains useful information about a deployed application.
@@ -98,52 +92,49 @@ var re_service_username = '<service_username>';
 var re_service_password = '<service_password>';
 var cloudant = '<cloudant credentials>';
 
-
 // Retrieve information from Bluemix Environment if possible
 if (process.env.VCAP_SERVICES) {
-	  // Running on Bluemix. Parse the process.env for the port and host that we've been assigned.
-	  var services = JSON.parse(process.env.VCAP_SERVICES);
-	  var host = process.env.VCAP_APP_HOST || '127.0.0.1';
-	  var port = process.env.VCAP_APP_PORT || 3000;
-	  // logger.info('VCAP_SERVICES: %s', process.env.VCAP_SERVICES);
-	  // Also parse out Cloudant settings.
-	  var cloudant = services['cloudantNoSQLDB'][0]['credentials'];
-		  try {
-    		var service_name = 'language_identification';
-    		if (services[service_name]) {
-      		var svc = services[service_name][0].credentials;
-      		service_url = svc.url;
-      		service_username = svc.username;
-      		service_password = svc.password;
-    		} else {
-      		    logger.error('The service '+service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
-    		  }
-  		}
-  		catch (e){
-    		  setTimeout(function() {
-        	    logger.error("Catched Fire on getting services");
-        	    logger.error(e);
-    		  }, 3000);
-  }
-
-  try {
-    var re_service_name = 'relationship_extraction';
-    if (services[re_service_name]) {
-      var re_svc = services[re_service_name][0].credentials;
-      re_service_url = re_svc.url;
-      re_service_username = re_svc.username;
-      re_service_password = re_svc.password;
-    } else {
-      logger.error('The service '+re_service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
-    }
-  }
-  catch (e){
-    setTimeout(function() {
-        logger.error("Catched Fire on getting services");
-        logger.error(e);
-    }, 3000);
-  }
-
+	// Running on Bluemix. Parse the process.env for the port and host that we've been assigned.
+	var services = JSON.parse(process.env.VCAP_SERVICES);
+	var host = process.env.VCAP_APP_HOST || '127.0.0.1';
+	var port = process.env.VCAP_APP_PORT || 3000;
+	// logger.info('VCAP_SERVICES: %s', process.env.VCAP_SERVICES);
+	// Also parse out Cloudant settings.
+	var cloudant = services['cloudantNoSQLDB'][0]['credentials'];
+	try {
+		var service_name = 'language_identification';
+		if (services[service_name]) {
+			var svc = services[service_name][0].credentials;
+			service_url = svc.url;
+			service_username = svc.username;
+			service_password = svc.password;
+		} else {
+				logger.error('The service '+service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
+		  }
+		}
+	catch (e){
+		  setTimeout(function() {
+	  	    logger.error("Catched Fire on getting services");
+	  	    logger.error(e);
+		  }, 3000);
+	}
+	try {
+	  var re_service_name = 'relationship_extraction';
+	  if (services[re_service_name]) {
+	    var re_svc = services[re_service_name][0].credentials;
+	    re_service_url = re_svc.url;
+	    re_service_username = re_svc.username;
+	    re_service_password = re_svc.password;
+	  } else {
+	    logger.error('The service '+re_service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
+	  }
+	}
+	catch (e){
+	  setTimeout(function() {
+	      logger.error("Catched Fire on getting services");
+	      logger.error(e);
+	  }, 3000);
+	}
 }
 
 var host = process.env.VCAP_APP_HOST || '127.0.0.1';
@@ -187,10 +178,11 @@ if (cloudant) {
 // Function to insert a new Doc into the Cloudant database
 function insert_doc(doc) {
 	if (cloudant) {
+		logger.debug("insert_doc() doc:", doc);
 	  db.insert(doc, function (error,http_body,http_headers) {
 	      if(error) return logger.error(error);
 	    });
-      // logger.debug(http_body);
+      // logger.debug("insert_doc() http_body:", http_body);
 		}
 }
 
@@ -204,7 +196,7 @@ function countView(callback) {
 			logger.error(err);
 			status = {'error': err};
 		} else {
-			//logger.debug(body);
+			//logger.debug("countview() body:", body);
 			body.rows.forEach(function(doc) {
 				count = doc.value;
 			});
@@ -213,9 +205,9 @@ function countView(callback) {
 					logger.error(err);
 					status = {'error': err};
 				} else {
-					//logger.debug(body);
+					//logger.debug(countview() body-2:", body);
 					body.rows.forEach(function(doc) {
-						//logger.debug("doc", doc);
+						//logger.debug("countview() doc:", doc);
 						var date = new Date(parseInt(doc.key));
 						status = {'count': count, 'lasttimestamp': date};
 					});
@@ -233,24 +225,25 @@ function setupTwitter() {
 	// TODO: Get application information and use it in your app.
 	// var twitterInfo = JSON.parse(process.env.TWITTER_INFO || "{}");
 
-
+  logger.debug("setupTwitter() - init");
+	twit = new twitter(configTwitter);
 	twit.stream('user', {track: configApp.track}, function(stream) {
 	    stream.on('data', function(data) {
-	        logger.debug(typeof data.target_object);
-					logger.debug(typeof data.id_str);
-					logger.debug(util.inspect(data));
+	        logger.debug("twit.stream(user) data.taget_object:", typeof data.target_object);
+					logger.debug("twit.stream(user) data.id_str:", typeof data.id_str);
+					logger.debug("twit.stream(user) inspect(data):", util.inspect(data));
 					logger.info("New tweet OK");
 					// Only insert tweets
 					if (typeof data.id_str !== 'undefined') insert_doc(data);
 	    });
 			stream.on('error', function(data) {
-					logger.error("Stream Error: ", util.inspect(data));
+					logger.error("twit.stream(user) Stream Error: ", util.inspect(data));
 			});
 			stream.on('done', function(data) {
-				logger.error("Stream done: ", util.inspect(data));
+				logger.error("twit.stream(user) Stream done: ", util.inspect(data));
 			});
 			stream.on('end', function(data) {
-				logger.error("Stream end: ", util.inspect(data));
+				logger.error("twit.stream(user) Stream end: ", util.inspect(data));
 			});
 	    //stream.on('favorite', function(data) {
 	    //    logger.debug(data.target_object.text);
@@ -267,12 +260,6 @@ function setupTwitter() {
 //
 // PAGES
 //
-
-// render index page
-//app.get('/', function(req, res){
-//    logger.debug("GET /");
-//    res.render('index');
-//});
 
 app.get('/status0', function(req, res){
 	//logger.debug("GET /");
@@ -297,7 +284,6 @@ app.get('/status', function(req, res){
 	});
 });
 
-
 app.get("/json/hashtags.json", function (req,res) {
 	var values = {'name': "hashtags", 'children': []};
 	db.viewWithList("design1", "hashTagView", "sortList", {"group": true, "reduce": true}, function(err, data) {
@@ -314,7 +300,6 @@ app.get("/json/hashtags.json", function (req,res) {
 		res.json(values);
 	});
 });
-
 
 app.get("/json/geo.json", function (req,res) {
 	var values = {'type': "FeatureCollection", 'features': []};
@@ -365,15 +350,23 @@ app.get("/tweets/:start?",
 		var tweets = [];
 		//status.documents = req.documents;
 		req.documents.forEach(function(doc) {
-			logger.debug("Doc: ", doc);
-			if (doc.doc.text) {
-				tweets.push( {
-					avatar     : doc.doc.user.profile_image_url,
-					body       : doc.doc.text,
-					//date       : new Date(Math.round(doc.doc.timestamp_ms/1000)),
-					date       : doc.doc.created_at,
-					screenname : doc.doc.user.screen_name
-				});
+			logger.debug("app.get(tweets) Doc: ", doc);
+			try {
+				if (doc.doc.text) {
+					tweets.push( {
+						avatar     : doc.doc.user.profile_image_url,
+						body       : doc.doc.text,
+						//date       : new Date(Math.round(doc.doc.timestamp_ms/1000)),
+						date       : doc.doc.created_at,
+						screenname : doc.doc.user.screen_name
+					});
+				}
+			}
+			catch (e) {
+  		  setTimeout(function() {
+      	    logger.error("Invalid doc format on /tweets/", doc);
+      	    logger.error(e);
+  		  }, 3000);
 			}
 		});
 		status.documents = tweets;
@@ -382,8 +375,6 @@ app.get("/tweets/:start?",
 		res.json(status);
 	}
 );
-
-
 
 app.get("/", function (req,res) {
 	var options = {
@@ -403,7 +394,6 @@ app.get("/", function (req,res) {
 			options.port = 80;
 		}
 	}
-
 
 	var reqA = http.request(options, function(resA) {
 		resA.setEncoding('utf8');
@@ -427,17 +417,12 @@ app.get("/", function (req,res) {
 		});
 		reqA.end();
 		// Render our 'home' template
-
-
 });
-
-
 
 app.get('/api/logrequest', function(req, res){
 	circular.addItem(req);
 	res.status(200).send("Logged OK");
 });
-
 
 app.get('/api/getrequests', function(req, res){
 	res.set('Content-Type', 'text/html');
@@ -452,7 +437,6 @@ app.get('/api/getrequests', function(req, res){
 	//res.json(x);
 	//res.status(200).send(circular.getItems().toString());
 });
-
 
 app.get('/getrequests', function(req, res){
 	//circular.getItems().map(function (a) {
@@ -470,8 +454,7 @@ app.get('/getrequests', function(req, res){
 	//res.status(200).send(circular.getItems().toString());
 });
 
-
-// Status Watcher to check if Twitter stream is working - if not it shutdown the app waiting for bluemix infra to restart it.
+// Status Watcher to check if Twitter stream is working - if not it restarts the twitter stream.
 setInterval(function() {
 	//logger.info("Checking twitter connection Status");
 	var lastUpdated;
@@ -492,6 +475,27 @@ setInterval(function() {
 		}
 	});
 }, 300000);
+
+app.get("/test", function (req, res) {
+	var doc1 = {
+		"created_at": 'Fri Aug 29 14:40:21 +0000 2015',
+		"id": 1,
+		"id_str": '1',
+		"text": 'SAMPLE ERROR',
+		"source": 'SAMPLE ERROR',
+		"truncated": false,
+		"timestamp_ms": "1540781840814",
+		"in_reply_to_status_id": null,
+		"in_reply_to_status_id_str": null,
+		"in_reply_to_user_id": null,
+		"in_reply_to_user_id_str": null,
+		"in_reply_to_screen_name": null
+	};
+	insert_doc(doc1);
+	res.send("Document Inserted");
+})
+
+
 
 logger.info("Connected to port =" + port + " host =  " + host);
 setupTwitter();
