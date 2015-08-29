@@ -225,10 +225,12 @@ function setupTwitter() {
 	// TODO: Get application information and use it in your app.
 	// var twitterInfo = JSON.parse(process.env.TWITTER_INFO || "{}");
 
-  logger.debug("setupTwitter() - init");
+  logger.info("setupTwitter() - init");
 	twit = new twitter(configTwitter);
+	var lastUpdated = Date.now();
 	twit.stream('user', {track: configApp.track}, function(stream) {
 	    stream.on('data', function(data) {
+					lastUpdated = Date.now();
 	        logger.debug("twit.stream(user) data.taget_object:", typeof data.target_object);
 					logger.debug("twit.stream(user) data.id_str:", typeof data.id_str);
 					logger.debug("twit.stream(user) inspect(data):", util.inspect(data));
@@ -253,6 +255,18 @@ function setupTwitter() {
 	    //});
 	    // Disconnect stream after five seconds
 	    //setTimeout(stream.destroy, 5000);
+
+			var setupTwitterTimer = setInterval(function() {
+				if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
+					logger.error("No new twitter updates since", lastUpdated, "so quitting ...");
+					//setupTwitter();
+					//process.exit(1);
+					stream.destroy();
+					clearInterval(setupTwitterTimer);
+					setupTwitter();
+				}
+			}, 300000);
+
 	});
 }
 
@@ -469,8 +483,8 @@ setInterval(function() {
 			//logger.debug("Time Diff between lastUpdated and now", Date.now() - lastUpdated);
 			if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
 				logger.error("No new twitter updates since", lastUpdated, "so quitting ...");
-				setupTwitter();
-				//process.exit(1);
+				//setupTwitter();
+				process.exit(1);
 			}
 		}
 	});
