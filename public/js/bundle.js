@@ -14,7 +14,6 @@ React.render(
   document.getElementById('react-app')
 );
 
-
 },{"./components/TweetsApp.react":6,"react":163}],2:[function(require,module,exports){
 /** @jsx React.DOM */
 

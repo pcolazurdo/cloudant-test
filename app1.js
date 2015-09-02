@@ -6,9 +6,8 @@
  */
 
 var configApp = require('./config.json');
+var version = configApp.version;
 var log4js = require('log4js');
-
-
 
 // Setup logging
 log4js.loadAppender('file');
@@ -17,6 +16,28 @@ log4js.replaceConsole(); // the important part
 var logger = log4js.getLogger();
 logger.setLevel(configApp.loggerLevel || "DEBUG");
 // End Setup logging
+
+var express = require('express');
+var errorHandler = require('errorhandler');
+var bodyParser = require('body-parser');
+var url = require('url');
+var querystring = require('querystring');
+var util = require('util');
+var twitter = require('twitter');
+var http = require('http');
+var https = require('https');
+var xmlescape = require('xml-escape');
+// Application Modules
+var paginate = require('./couchdb-paginate');
+var circular = require('./circularCache');
+
+// React
+var JSX = require('node-jsx').install();
+var React = require('react');
+var TweetsApp = React.createFactory(require('./components/TweetsApp.react'));
+//var TweetsApp = require('./components/TweetsApp.react');
+
+
 
 if (process.env.VCAP_SERVICES) {
 	logger.info(process.argv);
@@ -35,38 +56,12 @@ if (env != 'PROD') {
 	});
 }
 
-var express = require('express');
-var errorHandler = require('errorhandler');
-var bodyParser = require('body-parser');
-
-
-
-var url = require('url');
-var querystring = require('querystring');
-var util = require('util');
-var twitter = require('twitter');
-var http = require('http');
-var https = require('https');
-var xmlescape = require('xml-escape');
-
-// Application Modules
-var paginate = require('./couchdb-paginate');
-var circular = require('./circularCache');
-
-
-// React
-var JSX = require('node-jsx').install();
-var React = require('react');
-var TweetsApp = React.createFactory(require('./components/TweetsApp.react'));
-//var TweetsApp = require('./components/TweetsApp.react');
 
 //detect environment we're running - default is 'DEV'
 var env = process.env.NODE_ENV || 'DEV';
-
 logger.info("App Started: " + Date().toString());
 
 // Read config information
-
 //logger.info("Config information: ", configApp);
 
 // setup middleware
@@ -149,7 +144,6 @@ if (process.env.COUCH_HOST) {
 var auth = 'Basic ' + new Buffer(service_username + ':' + service_password).toString('base64');
 var re_auth = 'Basic ' + new Buffer(re_service_username + ':' + re_service_password).toString('base64');
 
-
 logger.info('service_url = ' + service_url);
 logger.info('service_username = ' + service_username);
 logger.info('service_password = ' + new Array(service_password.length).join("X"));
@@ -172,8 +166,6 @@ if (cloudant) {
 	});
 	var db = nano.use(db_name);
 }
-
-
 
 // Function to insert a new Doc into the Cloudant database
 function insert_doc(doc) {
@@ -256,6 +248,7 @@ function setupTwitter() {
 	    // Disconnect stream after five seconds
 	    //setTimeout(stream.destroy, 5000);
 
+      /*
 			var setupTwitterTimer = setInterval(function() {
 				if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
 					logger.error("No new twitter updates since", lastUpdated, "so quitting ...");
@@ -266,7 +259,7 @@ function setupTwitter() {
 					setupTwitter();
 				}
 			}, 300000);
-
+      */
 	});
 }
 
@@ -509,8 +502,6 @@ app.get("/test", function (req, res) {
 	res.send("Document Inserted");
 })
 
-
-
-logger.info("Connected to port =" + port + " host =  " + host);
+logger.info("Applicattion version: " + version + "Connected to port =" + port + " host =  " + host);
 setupTwitter();
 app.listen(port, host);

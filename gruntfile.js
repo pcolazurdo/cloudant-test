@@ -1,6 +1,18 @@
 yaml = require('js-yaml');
 fs = require('fs');
 
+function writeFileSync (file, obj, options) {
+	options = options || {}
+
+	var spaces = typeof options === 'object' && options !== null
+		? 'spaces' in options
+		? options.spaces : this.spaces
+		: this.spaces
+
+	var str = JSON.stringify(obj, options.replacer, spaces) + '\n'
+	// not sure if fs.writeFileSync returns anything, but just in case
+	return fs.writeFileSync(file, str, options)
+};
 
 module.exports = function(grunt) {
 	var pkg = grunt.file.readJSON('package.json');
@@ -46,26 +58,6 @@ module.exports = function(grunt) {
 					}
 					//console.log ('cf app ' + doc.applications[0].name);
 				}
-			},
-			gitstatus: {
-				command: function () {
-					return 'git status';
-				}
-			},
-			gitadd: {
-				command: function () {
-					return 'git add .';
-				}
-			},
-			gitcommit: {
-				command: function () {
-					return 'git commit -a -m "new commit"';
-				}
-			},
-			gitpush: {
-				command: function () {
-					return 'git push origin master';
-				}
 			}
 		}
 	});
@@ -73,27 +65,30 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-shell');
 	//grunt.loadNpmTasks('grunt-env');
 
+	grunt.registerTask('versionup',"Increment version to actual timestamp", function() {
+		var configfile = require('./config.json');
+		var newversion = Math.floor(Date.now() / 1000);
+		configfile.version = newversion.toString();
+		console.log("New app version is ", newversion)
+		writeFileSync('config.json', configfile);
+	});
+
+	grunt.registerTask('help',"Display helps", function() {
+		console.log("You can use grunt deploy to compile/adjust config files/deploy ");
+		console.log("or just grunt push to push to bluemix as is");
+	});
+
+
 	// bluemix
-	grunt.registerTask('push bluemix', [
-		'shell:cfpush',
-		'shell:cfstart'
+	grunt.registerTask('push', [
+		'shell:cfpush'
 	]);
 
 	grunt.registerTask('deploy', [
+		'versionup',
 		'shell:browserify',
 		'shell:push'
 	]);
+	grunt.registerTask('default', ['help']);
 
-	grunt.registerTask('status', [
-		'shell:gitstatus',
-		'shell:cfstatus'
-	]);
-
-	grunt.registerTask('gitcommit', [
-		'shell:gitadd',
-		'shell:gitcommit',
-		'shell:gitpush'
-	]);
-
-	grunt.registerTask('default', ['status']);
 };
