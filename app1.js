@@ -178,7 +178,7 @@ if (cloudant) {
 // Function to insert a new Doc into the Cloudant database
 function insert_doc(doc) {
 	if (cloudant) {
-		logger.debug("insert_doc() doc:", doc);
+		logger.info("insert_doc() doc:", doc);
 	  db.insert(doc, function (error,http_body,http_headers) {
 	      if(error) return logger.error(error);
 	    });
@@ -234,7 +234,7 @@ function setupTwitter() {
 	        logger.debug("twit.stream(user) data.taget_object:", typeof data.target_object);
 					logger.debug("twit.stream(user) data.id_str:", typeof data.id_str);
 					logger.debug("twit.stream(user) inspect(data):", util.inspect(data));
-					logger.info("New tweet OK");
+					logger.info("New tweet OK", data.id_str + " " + data.text);
 					// Only insert tweets
 					if (typeof data.id_str !== 'undefined') insert_doc(data);
 	    });
@@ -469,26 +469,26 @@ app.get('/getrequests', function(req, res){
 });
 
 // Status Watcher to check if Twitter stream is working - if not it restarts the twitter stream.
-setInterval(function() {
-	//logger.info("Checking twitter connection Status");
-	var lastUpdated;
-	db.view("design1", "lastTimeView", {"limit": 1, "descending": true}, function(err, body) {
-		if (err) {
-			logger.error(err);
-		} else {
-			//logger.debug(body);
-			body.rows.forEach(function(doc) {
-				lastUpdated = new Date(parseInt(doc.key));
-			});
-			//logger.debug("Time Diff between lastUpdated and now", Date.now() - lastUpdated);
-			if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
-				logger.error("No new twitter updates since", lastUpdated, "so quitting ...");
-				//setupTwitter();
-				process.exit(1);
-			}
-		}
-	});
-}, 300000);
+// setInterval(function() {
+// 	//logger.info("Checking twitter connection Status");
+// 	var lastUpdated;
+// 	db.view("design1", "lastTimeView", {"limit": 1, "descending": true}, function(err, body) {
+// 		if (err) {
+// 			logger.error(err);
+// 		} else {
+// 			//logger.debug(body);
+// 			body.rows.forEach(function(doc) {
+// 				lastUpdated = new Date(parseInt(doc.key));
+// 			});
+// 			//logger.debug("Time Diff between lastUpdated and now", Date.now() - lastUpdated);
+// 			if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
+// 				logger.error("No new twitter updates since", lastUpdated, "so quitting ...");
+// 				//setupTwitter();
+// 				process.exit(1);
+// 			}
+// 		}
+// 	});
+// }, 300000);
 
 app.get("/test", function (req, res) {
 	var doc1 = {
