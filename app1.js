@@ -6,7 +6,6 @@
  */
 
 var configApp = require('./config.json');
-var version = configApp.version;
 var log4js = require('log4js');
 
 // Setup logging
@@ -72,6 +71,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public')); //setup static public directory
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/views'); //optional since express defaults to CWD/views
+
+app.locals.config = configApp;
 
 // There are many useful environment variables available in process.env.
 // VCAP_APPLICATION contains useful information about a deployed application.
@@ -502,6 +503,6 @@ app.get("/test", function (req, res) {
 	res.send("Document Inserted");
 })
 
-logger.info("Applicattion version: " + version + "Connected to port =" + port + " host =  " + host);
+logger.info("Application version: " + configApp.version + "Connected to port =" + port + " host =  " + host);
 setupTwitter();
 app.listen(port, host);

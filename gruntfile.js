@@ -16,32 +16,42 @@ function writeFileSync (file, obj, options) {
 
 module.exports = function(grunt) {
 	var pkg = grunt.file.readJSON('package.json');
+	var doc = JSON.parse(JSON.stringify(yaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'))));
+	var appName = doc.applications[0].name
 	grunt.initConfig({
 		shell: {
 			push: {
 				command: function () {
-					grunt.log.writeln('Pushing ' + pkg.name + ' to bluemix');
-	        return 'cf push '+ pkg.name;
+					grunt.log.writeln('Pushing ' + appName + ' to bluemix');
+	        return 'cf push '+ appName;
+				}
+			},
+			test: {
+				command: function () {
+					grunt.log.writeln('Testing ' + appName);
+	        return 'npm test';
 				}
 			},
 			browserify: {
 				command: function () {
-					grunt.log.writeln('Browserifying ' + pkg.name);
+					grunt.log.writeln('Browserifying ' + appName);
         	return 'npm run browserify';
 				}
 			},
 			cfpush: {
 				command: function () {
 					grunt.file.delete ("output.log");
-					return 'cf push' ;
+					var doc = JSON.parse(JSON.stringify(yaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'))));
+					console.log(doc);
+					return 'cf push' + appName;
 				}
 			},
 			cfstart: {
 				command: function () {
 					try {
-						var doc = JSON.parse(JSON.stringify(yaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'))));
+
 						//console.log(doc);
-						return 'cf start ' + doc.applications[0].name;
+						return 'cf start ' + appName;
 					} catch (e) {
 						console.log(e);
 					}
@@ -50,9 +60,8 @@ module.exports = function(grunt) {
 			cfstatus: {
 				command: function () {
 					try {
-						var doc = JSON.parse(JSON.stringify(yaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'))));
 						//console.log(doc);
-						return 'cf app ' + doc.applications[0].name;
+						return 'cf app ' + appName;
 					} catch (e) {
 						console.log(e);
 					}
@@ -84,7 +93,13 @@ module.exports = function(grunt) {
 		'shell:cfpush'
 	]);
 
+	// npm
+	grunt.registerTask('test', [
+		'shell:test'
+	]);
+
 	grunt.registerTask('deploy', [
+		'test',
 		'versionup',
 		'shell:browserify',
 		'shell:push'

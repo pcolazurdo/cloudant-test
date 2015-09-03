@@ -11,7 +11,7 @@ cacheMemory.items = [];
 module.exports = {
   addItem: function(content)
   {
-    if (cacheMemory.items.length > maxItems) {
+    if (cacheMemory.items.length >= maxItems) {
       cacheMemory.items.pop();
     }
     cacheMemory.items.push(content);
@@ -23,5 +23,5 @@ module.exports = {
 
   flush: function() {
     cacheMemory.items = [];
-  }
+  }  
 };

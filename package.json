@@ -7,7 +7,7 @@
     "node": "0.10.29"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1",
+    "test": "mocha",
     "start": "node app1.js",
     "watch": "watchify client.js -o public/js/bundle.js -v",
     "browserify": "browserify -t reactify client.js > public/js/bundle.js",
@@ -46,7 +46,9 @@
     "browserify": "~11.0.1",
     "reactify": "~1.1.1",
     "uglify-js": "~2.4.24",
-    "watchify": "~3.3.1"
+    "watchify": "~3.3.1",
+    "mocha": "~2.3.0",
+    "chai": "~3.2.0"
   },
   "browserify": {
     "transform": [
