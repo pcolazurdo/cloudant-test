@@ -7,15 +7,9 @@
 
 // Get application config
 var configApp = require('./config.json');
+var logger = require('./lib/logging').logger;
+var bluemix = require('./lib/bluemix-setup');
 
-// Setup logging
-var log4js = require('log4js');
-log4js.loadAppender('file');
-log4js.addAppender(log4js.appenders.file('output.log', null, 10000000, 3, true));
-log4js.replaceConsole(); // the important part
-var logger = log4js.getLogger();
-logger.setLevel(configApp.loggerLevel || "DEBUG");
-// End Setup logging
 
 // Generic requires
 var express = require('express');
@@ -29,8 +23,8 @@ var http = require('http');
 var https = require('https');
 var xmlescape = require('xml-escape');
 // Application Modules
-var paginate = require('./couchdb-paginate');
-var circular = require('./circularCache');
+var paginate = require('./lib/couchdb-paginate');
+var circular = require('./lib/circularCache');
 
 // React
 var JSX = require('node-jsx').install();
@@ -39,9 +33,9 @@ var TweetsApp = React.createFactory(require('./components/TweetsApp.react'));
 //var TweetsApp = require('./components/TweetsApp.react');
 
 if (process.env.VCAP_SERVICES) {
-	logger.info(process.argv);
-	logger.info(process.execArgv);
-	logger.info(process.env);
+	logger.debug(process.argv);
+	logger.debug(process.execArgv);
+	logger.debug(process.env);
 }
 
 //Capture all Unhandled Errors - seems not recommended in production so we use
@@ -72,84 +66,19 @@ app.set('views', __dirname + '/views'); //optional since express defaults to CWD
 // Setup generic configuration to locals for using in Jade templates
 app.locals.config = configApp;
 
-// There are many useful environment variables available in process.env.
-// VCAP_APPLICATION contains useful information about a deployed application.
-var appInfo = JSON.parse(process.env.VCAP_APPLICATION || "{}");
-// TODO: Get application information and use it in your app.
-
-// defaults for dev outside bluemix
-var service_url = '<service_url>';
-var service_username = '<service_username>';
-var service_password = '<service_password>';
-var re_service_url = '<service_url>';
-var re_service_username = '<service_username>';
-var re_service_password = '<service_password>';
-var cloudant = '<cloudant credentials>';
-
-// Retrieve information from Bluemix Environment if possible
-if (process.env.VCAP_SERVICES) {
-	// Running on Bluemix. Parse the process.env for the port and host that we've been assigned.
-	var services = JSON.parse(process.env.VCAP_SERVICES);
-	var host = process.env.VCAP_APP_HOST || '127.0.0.1';
-	var port = process.env.VCAP_APP_PORT || 3000;
-	// logger.info('VCAP_SERVICES: %s', process.env.VCAP_SERVICES);
-	// Also parse out Cloudant settings.
-	var cloudant = services['cloudantNoSQLDB'][0]['credentials'];
-	try {
-		var service_name = 'language_identification';
-		if (services[service_name]) {
-			var svc = services[service_name][0].credentials;
-			service_url = svc.url;
-			service_username = svc.username;
-			service_password = svc.password;
-		} else {
-				logger.error('The service '+service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
-		  }
-		}
-	catch (e){
-		  setTimeout(function() {
-	  	    logger.error("Catched Fire on getting services");
-	  	    logger.error(e);
-		  }, 3000);
-	}
-	try {
-	  var re_service_name = 'relationship_extraction';
-	  if (services[re_service_name]) {
-	    var re_svc = services[re_service_name][0].credentials;
-	    re_service_url = re_svc.url;
-	    re_service_username = re_svc.username;
-	    re_service_password = re_svc.password;
-	  } else {
-	    logger.error('The service '+re_service_name+' is not in the VCAP_SERVICES, did you forget to bind it?');
-	  }
-	}
-	catch (e){
-	  setTimeout(function() {
-	      logger.error("Catched Fire on getting services");
-	      logger.error(e);
-	  }, 3000);
-	}
-}
-
 var host = process.env.VCAP_APP_HOST || '127.0.0.1';
 var port = process.env.VCAP_APP_PORT || 3000;
 
 // Retrieve cloudant information from Linux Environment
 if (process.env.COUCH_HOST) {
-          var cloudant = process.env['COUCH_HOST'];
+          var cloudant = process.env.COUCH_HOST;
 					logger.info (cloudant);
 }
 
-var auth = 'Basic ' + new Buffer(service_username + ':' + service_password).toString('base64');
-var re_auth = 'Basic ' + new Buffer(re_service_username + ':' + re_service_password).toString('base64');
-
-logger.info('service_url = ' + service_url);
-logger.info('service_username = ' + service_username);
-logger.info('service_password = ' + new Array(service_password.length).join("X"));
-logger.info('re_service_url = ' + re_service_url);
-logger.info('re_service_username = ' + re_service_username);
-logger.info('re_service_password = ' + new Array(re_service_password.length).join("X"));
-logger.info('cloudant = ' + cloudant);
+if (bluemix.cloudant) {
+	var cloudant = bluemix.cloudant;
+	logger.info (cloudant);
+}
 
 // Setup Cloudant connection
 if (cloudant) {
@@ -274,7 +203,7 @@ app.get('/demographic', function(req, res){
 
 app.get('/timeline', function(req, res){
 	countView( function (countStatus) {
-		values = new Array();
+		values = [];
 		db.view("design1", "timestampView", {"group": true, "reduce": true}, function(err, body) {
 			if (!err) {
 				body.rows.forEach(function(doc) {
@@ -361,7 +290,7 @@ app.get("/tweets/:start?",
 						avatar     : doc.doc.user.profile_image_url,
 						body       : doc.doc.text,
 						id_str     : doc.doc.id_str,
-						dbid       : doc.id,
+						key        : doc.id,
 						//date       : new Date(Math.round(doc.doc.timestamp_ms/1000)),
 						date       : doc.doc.created_at,
 						screenname : doc.doc.user.screen_name
@@ -499,8 +428,8 @@ app.get("/test/push", function (req, res) {
 	};
 	insert_doc(doc1);
 	res.send("Document Inserted");
-})
+});
 
-logger.info("Application version: " + configApp.version + "Connected to port =" + port + " host =  " + host);
+logger.info("Application version: " + configApp.version + " Connected to port =" + port + " host =  " + host);
 setupTwitter();
 app.listen(port, host);

@@ -83,7 +83,7 @@ module.exports = Tweets = React.createClass({displayName: "Tweets",
     var content = this.props.tweets.documents.map(function(tweet){
       //console.log(tweet);
       return (
-        React.createElement(Tweet, {key: tweet._id, tweet: tweet})
+        React.createElement(Tweet, {key: tweet.key, tweet: tweet})
       )
     });
 

@@ -12,7 +12,7 @@ module.exports = Tweets = React.createClass({
     var content = this.props.tweets.documents.map(function(tweet){
       //console.log(tweet);
       return (
-        <Tweet key={tweet._id} tweet={tweet} />
+        <Tweet key={tweet.key} tweet={tweet} />
       )
     });
 

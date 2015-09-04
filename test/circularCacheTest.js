@@ -4,7 +4,7 @@ var mocha = require('mocha');
 //mocha.setup("BDD");
 
 
-var circular = require('../circularCache');
+var circular = require('../lib/circularCache');
 
 describe('circularCache', function() {
 	describe("#addItem", function () {
