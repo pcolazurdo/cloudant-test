@@ -14,7 +14,7 @@
     },
     "userCountView": {
       "reduce": "_sum",
-      "map": "function(doc) {\n  emit(doc.user.screen_name, 1);\n}"
+      "map": "function (doc) {\n  emit(doc.user.screen_name, 1);\n}"
     },
     "userReachView": {
       "reduce": "_sum",
@@ -32,5 +32,11 @@
       "reduce": "_sum"
     }
   },
-  "language": "javascript"
+  "language": "javascript",
+  "indexes": {
+    "textSearch": {
+      "analyzer": "simple",
+      "index": "function (doc) {\n  if (doc.text) {\n    index(\"text\", doc.text, {\"store\": true, \"index\": true});\n  }\n}"
+    }
+  }
 }

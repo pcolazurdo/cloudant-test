@@ -205,6 +205,11 @@ app.get('/demographic', function(req, res){
 	res.render('demographic');
 });
 
+app.get('/usercount', function(req, res){
+	//logger.debug("GET /");
+	res.render('usercount');
+});
+
 app.get('/timeline', function(req, res){
 	countView( function (countStatus) {
 		values = [];
@@ -238,6 +243,25 @@ app.get("/json/hashtags.json", function (req,res) {
 		res.json(values);
 	});
 });
+
+
+app.get("/json/usercount.json", function (req,res) {
+	var values = {'name': "hashtags", 'children': []};
+	db.viewWithList("design1", "userCountView", "sortList", {"group": true, "reduce": true}, function(err, data) {
+		if (!err) {
+			data.rows.forEach(function(doc) {
+				//logger.debug(doc);
+				values.children.push ( {'name': doc.key, 'size': doc.value} );
+				//logger.debug({'key': doc.key, 'value': doc.value});
+			});
+		} else {
+			res.json(err);
+		}
+		res.json(values);
+	});
+});
+
+
 
 app.get("/json/geo.json", function (req,res) {
 	var values = {'type': "FeatureCollection", 'features': []};
