@@ -60,6 +60,10 @@ app.use(errorHandler());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public')); //setup static public directory
+app.use(function(req, res, next) {
+  console.log('%s %s %s', req.method, req.url, req.path);
+  next();
+});
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/views'); //optional since express defaults to CWD/views
 
@@ -354,24 +358,26 @@ app.get("/", function (req,res) {
 		// Render our 'home' template
 });
 
-app.get('/api/logrequest', function(req, res){
-	circular.addItem(req);
-	res.status(200).send("Logged OK");
-});
 
-app.get('/api/getrequests', function(req, res){
-	res.set('Content-Type', 'text/html');
-	var buffer = "";
-	buffer += "<!doctype html><HEAD></HEAD><BODY>";
-	circular.getItems().map(function (a) {
-		buffer += util.inspect(a, { showHidden: true, depth: 5 }).replace(/[\n\r]/g, '<br />\n');
-	});
-	buffer +=	"</BODY>" ;
-	res.send(buffer);
-	//console.log("getrequests", typeof(x), x);
-	//res.json(x);
-	//res.status(200).send(circular.getItems().toString());
-});
+app.use('/api', require('./lib/routes/api'));
+// app.get('/api/logrequest', function(req, res){
+// 	circular.addItem(req);
+// 	res.status(200).send("Logged OK");
+// });
+//
+// app.get('/api/getrequests', function(req, res){
+// 	res.set('Content-Type', 'text/html');
+// 	var buffer = "";
+// 	buffer += "<!doctype html><HEAD></HEAD><BODY>";
+// 	circular.getItems().map(function (a) {
+// 		buffer += util.inspect(a, { showHidden: true, depth: 5 }).replace(/[\n\r]/g, '<br />\n');
+// 	});
+// 	buffer +=	"</BODY>" ;
+// 	res.send(buffer);
+// 	//console.log("getrequests", typeof(x), x);
+// 	//res.json(x);
+// 	//res.status(200).send(circular.getItems().toString());
+// });
 
 app.get('/getrequests', function(req, res){
 	//circular.getItems().map(function (a) {
