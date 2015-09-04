@@ -1,14 +1,15 @@
 /**************************************************************************************************
  *
  * Developed by : Pablo E. Colazurdo
- * Date: Dec 20114
+ * Date: Dec 2014
  *
  */
 
+// Get application config
 var configApp = require('./config.json');
-var log4js = require('log4js');
 
 // Setup logging
+var log4js = require('log4js');
 log4js.loadAppender('file');
 log4js.addAppender(log4js.appenders.file('output.log', null, 10000000, 3, true));
 log4js.replaceConsole(); // the important part
@@ -16,6 +17,7 @@ var logger = log4js.getLogger();
 logger.setLevel(configApp.loggerLevel || "DEBUG");
 // End Setup logging
 
+// Generic requires
 var express = require('express');
 var errorHandler = require('errorhandler');
 var bodyParser = require('body-parser');
@@ -36,8 +38,6 @@ var React = require('react');
 var TweetsApp = React.createFactory(require('./components/TweetsApp.react'));
 //var TweetsApp = require('./components/TweetsApp.react');
 
-
-
 if (process.env.VCAP_SERVICES) {
 	logger.info(process.argv);
 	logger.info(process.execArgv);
@@ -55,15 +55,12 @@ if (env != 'PROD') {
 	});
 }
 
-
 //detect environment we're running - default is 'DEV'
 var env = process.env.NODE_ENV || 'DEV';
 logger.info("App Started: " + Date().toString());
+logger.info("Environment: " + env);
 
-// Read config information
-//logger.info("Config information: ", configApp);
-
-// setup middleware
+// Setup middleware
 var app = express();
 app.use(errorHandler());
 app.use(bodyParser.json());
@@ -72,6 +69,7 @@ app.use(express.static(__dirname + '/public')); //setup static public directory
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/views'); //optional since express defaults to CWD/views
 
+// Setup generic configuration to locals for using in Jade templates
 app.locals.config = configApp;
 
 // There are many useful environment variables available in process.env.
@@ -171,8 +169,8 @@ if (cloudant) {
 // Function to insert a new Doc into the Cloudant database
 function insert_doc(doc) {
 	if (cloudant) {
-		logger.info("insert_doc() doc:", doc);
-	  db.insert(doc, function (error,http_body,http_headers) {
+		logger.info("insert_doc() doc.id_str:", doc.id_str);
+	  db.insert(doc, function (error, http_body, http_headers) {
 	      if(error) return logger.error(error);
 	    });
       // logger.debug("insert_doc() http_body:", http_body);
@@ -222,45 +220,45 @@ function setupTwitter() {
 	twit = new twitter(configTwitter);
 	var lastUpdated = Date.now();
 	twit.stream('user', {track: configApp.track}, function(stream) {
-	    stream.on('data', function(data) {
-					lastUpdated = Date.now();
-	        logger.debug("twit.stream(user) data.taget_object:", typeof data.target_object);
-					logger.debug("twit.stream(user) data.id_str:", typeof data.id_str);
-					logger.debug("twit.stream(user) inspect(data):", util.inspect(data));
-					logger.info("New tweet OK", data.id_str + " " + data.text);
-					// Only insert tweets
-					if (typeof data.id_str !== 'undefined') insert_doc(data);
-	    });
-			stream.on('error', function(data) {
-					logger.error("twit.stream(user) Stream Error: ", util.inspect(data));
-			});
-			stream.on('done', function(data) {
-				logger.error("twit.stream(user) Stream done: ", util.inspect(data));
-			});
-			stream.on('end', function(data) {
-				logger.error("twit.stream(user) Stream end: ", util.inspect(data));
-			});
-	    //stream.on('favorite', function(data) {
-	    //    logger.debug(data.target_object.text);
-	    //    insert_doc(data, data.target_object.id_str, function (err, response) {
-	    //        logger.debug(err || response);
-	    //      });
-	    //});
-	    // Disconnect stream after five seconds
-	    //setTimeout(stream.destroy, 5000);
+    stream.on('data', function(data) {
+			lastUpdated = Date.now();
+      logger.debug("twit.stream(user) data.taget_object:", typeof data.target_object);
+			logger.debug("twit.stream(user) data.id_str:", typeof data.id_str);
+			logger.debug("twit.stream(user) inspect(data):", util.inspect(data));
+			logger.info("New tweet OK", data.id_str + " " + data.text);
+			// Only insert tweets
+			if (typeof data.id_str !== 'undefined') insert_doc(data);
+    });
+		stream.on('error', function(data) {
+			logger.error("twit.stream(user) Stream Error: ", util.inspect(data));
+		});
+		stream.on('done', function(data) {
+			logger.error("twit.stream(user) Stream done: ", util.inspect(data));
+		});
+		stream.on('end', function(data) {
+			logger.error("twit.stream(user) Stream end: ", util.inspect(data));
+		});
+    //stream.on('favorite', function(data) {
+    //    logger.debug(data.target_object.text);
+    //    insert_doc(data, data.target_object.id_str, function (err, response) {
+    //        logger.debug(err || response);
+    //      });
+    //});
+    //  Disconnect stream after five seconds
+    //  setTimeout(stream.destroy, 5000);
 
-      /*
-			var setupTwitterTimer = setInterval(function() {
-				if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
-					logger.error("No new twitter updates since", lastUpdated, "so quitting ...");
-					//setupTwitter();
-					//process.exit(1);
-					stream.destroy();
-					clearInterval(setupTwitterTimer);
-					setupTwitter();
-				}
-			}, 300000);
-      */
+
+		var setupTwitterTimer = setInterval(function() {
+			if ( Date.now() - lastUpdated > 300000) { //More than 5 mins
+				logger.error("No new twitter updates since", lastUpdated, "so quitting ...");
+				//setupTwitter();
+				//process.exit(1);
+				stream.destroy();
+				clearInterval(setupTwitterTimer);
+				setupTwitter();
+			}
+		}, 300000);
+
 	});
 }
 
@@ -269,12 +267,12 @@ function setupTwitter() {
 // PAGES
 //
 
-app.get('/status0', function(req, res){
+app.get('/demographic', function(req, res){
 	//logger.debug("GET /");
-	res.render('status0');
+	res.render('demographic');
 });
 
-app.get('/status', function(req, res){
+app.get('/timeline', function(req, res){
 	countView( function (countStatus) {
 		values = new Array();
 		db.view("design1", "timestampView", {"group": true, "reduce": true}, function(err, body) {
@@ -287,7 +285,7 @@ app.get('/status', function(req, res){
 			} else {
 				countStatus.error = err;
 			}
-			res.render('status', countStatus);
+			res.render('timeline', countStatus);
 		});
 	});
 });
@@ -295,7 +293,6 @@ app.get('/status', function(req, res){
 app.get("/json/hashtags.json", function (req,res) {
 	var values = {'name': "hashtags", 'children': []};
 	db.viewWithList("design1", "hashTagView", "sortList", {"group": true, "reduce": true}, function(err, data) {
-
 		if (!err) {
 			data.rows.forEach(function(doc) {
 				//logger.debug(doc);
@@ -318,10 +315,9 @@ app.get("/json/geo.json", function (req,res) {
 				//if (doc.value && doc.value > 1) {
 				if (doc.value) {
 					if (doc.key.coordinates)
-							coord = doc.key.coordinates;
+						coord = doc.key.coordinates;
 					else
-							coord = doc.key.place.coordinates;
-
+						coord = doc.key.place.coordinates;
 					if (coord && coord.coordinates) {
 						coord.coordinates = coord.coordinates.map( function (num) {
 							//logger.debug(num);
@@ -364,6 +360,8 @@ app.get("/tweets/:start?",
 					tweets.push( {
 						avatar     : doc.doc.user.profile_image_url,
 						body       : doc.doc.text,
+						id_str     : doc.doc.id_str,
+						dbid       : doc.id,
 						//date       : new Date(Math.round(doc.doc.timestamp_ms/1000)),
 						date       : doc.doc.created_at,
 						screenname : doc.doc.user.screen_name
@@ -484,7 +482,7 @@ app.get('/getrequests', function(req, res){
 // 	});
 // }, 300000);
 
-app.get("/test", function (req, res) {
+app.get("/test/push", function (req, res) {
 	var doc1 = {
 		"created_at": 'Fri Aug 29 14:40:21 +0000 2015',
 		"id": 1,
